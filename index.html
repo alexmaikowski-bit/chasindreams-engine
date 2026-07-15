@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chasin' Dreams Farm — Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Fredoka:wght@500;600;700&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<style>
+  :root{
+    --brand:#E5309A; --brand-deep:#B81F72; --brand-light:#FCE4F2; --brand-mid:#7C3AED;
+    --magenta:#E5309A; --purple:#7C3AED; --purple-deep:#5B21B6; --orange:#F5A623;
+    --accent:#C6F135; --accent-soft:#DDF684; --accent-deep:#7DA30A; --accent-pale:#EFFBCB;
+    --cream:#FDF4FB; --cream-deep:#F8E8F4; --paper:#FFFFFF;
+    --ink:#2A1533; --ink-soft:#6E5578; --border:#F1DDED;
+    --coral:#F5A623; --teal:#3AA6E0; --pink:#E24E96; --green:#5CB85C;
+    --hi:#3AA76D; --warn:#E0872B;
+    --shadow:0 2px 10px rgba(42,21,51,.08); --shadow-lg:0 16px 46px rgba(42,21,51,.20);
+    --hard:4px 4px 0 var(--brand-deep); --r:18px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:'Nunito',system-ui,sans-serif;background:var(--cream);color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  h1,h2,h3,h4{font-family:'Baloo 2','Fredoka','Nunito',sans-serif}
+  a{color:inherit}
+  ::selection{background:var(--accent);color:var(--brand-deep)}
+
+  .app{display:grid;grid-template-columns:214px 1fr;min-height:100vh}
+
+  /* Sidebar */
+  .side{background:var(--brand-deep);color:#fff;padding:20px 14px;display:flex;flex-direction:column;gap:5px;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .logo{margin-bottom:16px}
+  .logo-blocks{display:flex;gap:3px;margin-bottom:7px}
+  .blk{width:27px;height:27px;border-radius:6px;display:grid;place-items:center;font-family:'Baloo 2';font-weight:900;font-size:15px;color:var(--brand-deep);box-shadow:0 2px 0 rgba(0,0,0,.15)}
+  .logo-name{font-family:'Baloo 2';font-weight:900;font-size:18px;letter-spacing:.01em;line-height:1;color:#fff}
+  .logo-sub{font-size:10px;color:var(--accent);font-style:italic;font-family:'Fraunces';margin-top:3px}
+  .nav-item{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:11px;cursor:pointer;font-size:13.5px;font-weight:700;color:#C9BEE8;transition:.15s;border:none;background:none;text-align:left;width:100%;font-family:'Nunito'}
+  .nav-item:hover{background:rgba(255,255,255,.09);color:#fff}
+  .nav-item.on{background:var(--brand);color:#fff}
+  .nav-item .ico{font-size:15px}
+  .nav-new{font-size:8px;background:var(--accent);color:var(--brand-deep);padding:1px 6px;border-radius:20px;margin-left:auto;letter-spacing:.04em;font-weight:800}
+  .nav-wip{font-size:8px;background:rgba(255,255,255,.15);padding:1px 6px;border-radius:20px;margin-left:auto;letter-spacing:.05em}
+  .side-spacer{flex:1;min-height:14px}
+  .btn-chunky{background:var(--accent-soft);color:var(--brand-deep);border:2px solid var(--brand-deep);padding:11px;border-radius:14px;font-weight:800;font-size:13px;cursor:pointer;font-family:'Baloo 2';display:flex;align-items:center;gap:7px;justify-content:center;box-shadow:3px 3px 0 var(--brand-deep);transition:.12s}
+  .btn-chunky:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--brand-deep)}
+  .btn-chunky:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--brand-deep)}
+  .howlink{background:none;border:none;color:#9385C4;font-size:11px;cursor:pointer;padding:8px;text-align:center;font-weight:700}
+  .howlink:hover{color:#fff}
+
+  /* Main */
+  .main{padding:0 0 60px;min-width:0}
+  .page-head{padding:26px 34px 12px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  .page-head h1{font-size:32px;font-weight:900;margin:0 0 4px;letter-spacing:-.01em;color:var(--brand)}
+  .page-head .dek{font-family:'Fraunces';font-style:italic;font-size:15px;color:var(--ink-soft);margin:0;max-width:660px;line-height:1.4}
+  .pill{display:inline-flex;align-items:center;gap:6px;background:var(--accent-pale);border:1.5px solid var(--brand);padding:6px 13px;border-radius:30px;font-size:11.5px;font-weight:800;white-space:nowrap;color:var(--brand)}
+  .live-dot{width:7px;height:7px;border-radius:50%;background:var(--hi);animation:pulse 2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(58,167,109,.5)}70%{box-shadow:0 0 0 7px rgba(58,167,109,0)}100%{box-shadow:0 0 0 0 rgba(58,167,109,0)}}
+
+  .ticker{background:var(--brand-deep);color:#fff;overflow:hidden;white-space:nowrap;padding:9px 0;margin:0 0 18px}
+  .ticker-track{display:inline-block;animation:scroll 44s linear infinite}
+  .ticker-track span{margin:0 15px;font-size:11.5px;font-family:'JetBrains Mono'}
+  .tdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;vertical-align:middle}
+  @keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+  .wrap{padding:0 34px}
+  .section-eyebrow{font-family:'JetBrains Mono';font-size:10.5px;letter-spacing:.14em;color:var(--brand);text-transform:uppercase;margin:26px 0 12px;font-weight:700}
+
+  .subtabs{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 20px}
+  .subtab{background:var(--paper);border:1.5px solid var(--border);padding:8px 14px;border-radius:30px;font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;color:var(--ink-soft);transition:.15s;font-family:'Nunito'}
+  .subtab:hover{border-color:var(--brand)}
+  .subtab.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .subtab .badge{background:rgba(0,0,0,.12);border-radius:20px;padding:0 6px;font-size:10px;font-weight:800}
+  .subtab.on .badge{background:rgba(255,255,255,.25)}
+
+  .grid{display:grid;gap:14px}
+  .grid-2{grid-template-columns:repeat(2,1fr)}
+  .grid-3{grid-template-columns:repeat(3,1fr)}
+
+  .card{background:var(--paper);border:1px solid var(--border);border-radius:var(--r);padding:16px 16px 14px;position:relative;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+  .card .rail{position:absolute;left:0;top:0;bottom:0;width:5px}
+  .card-head{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+  .glyph{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;font-size:17px;flex-shrink:0}
+  .eyebrow{font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);font-weight:700}
+  .vbadge{margin-left:auto;font-size:9.5px;font-weight:800;padding:3px 8px;border-radius:20px;font-family:'JetBrains Mono';letter-spacing:.03em}
+  .vhigh{background:#FDECEA;color:#C0392B}.vmed{background:#FDF3DA;color:#B9791B}.vlow{background:#EFEDE7;color:#8A8175}
+  .card h3{font-family:'Fraunces';font-size:16px;font-weight:600;margin:0 0 7px;line-height:1.28}
+  .card p.detail{font-size:13px;color:var(--ink-soft);line-height:1.5;margin:0 0 10px}
+  .playbox{background:var(--brand-light);border-radius:12px;padding:10px 12px;margin:0 0 10px;font-size:12.5px;line-height:1.45}
+  .playbox .plabel{font-family:'JetBrains Mono';font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--brand);font-weight:700;display:block;margin-bottom:3px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:auto}
+  .chip{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:var(--cream-deep);color:var(--ink-soft)}
+  .chip.brand{background:var(--brand-light);color:var(--brand)}
+  .chip.plat{background:var(--accent-pale);color:var(--accent-deep)}
+  .srcchips{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
+  .src{font-family:'JetBrains Mono';font-size:9.5px;color:var(--ink-soft);background:var(--cream);border:1px solid var(--border);padding:2px 7px;border-radius:6px;text-decoration:none}
+  .src:hover{border-color:var(--brand);color:var(--brand)}
+  .dropbtn{margin-left:auto;background:var(--accent-soft);color:var(--brand-deep);border:1.5px solid var(--brand-deep);font-size:10.5px;font-weight:800;padding:4px 11px;border-radius:20px;cursor:pointer;font-family:'Baloo 2';box-shadow:2px 2px 0 var(--brand-deep)}
+  .dropbtn:hover{transform:translate(-1px,-1px)}
+  .brief-link{display:flex;align-items:center;gap:6px;background:var(--accent-pale);border:1px solid var(--accent-deep);color:var(--brand-deep);border-radius:10px;padding:8px 11px;font-size:11px;font-weight:800;cursor:pointer;margin-top:10px;font-family:'Nunito';text-align:left;line-height:1.35;width:100%}
+  .brief-link:hover{background:var(--accent-soft)}
+  .brief-link .bl-arrow{font-family:'JetBrains Mono';flex-shrink:0}
+  .pips{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
+  .pip{font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;letter-spacing:.01em;display:inline-flex;align-items:center;gap:3px}
+  .read-hint{background:var(--brand-light);border:1px solid #DBCEF4;border-radius:13px;padding:11px 15px;font-size:12px;line-height:1.55;color:var(--ink-soft);margin-bottom:16px;display:flex;gap:9px;align-items:flex-start}
+  .read-hint b{color:var(--brand);font-weight:800}
+  .read-hint .rh-ico{font-size:15px;flex-shrink:0;line-height:1.3}
+  .lnow{color:var(--green);font-weight:800;white-space:nowrap}
+  .ltail{color:var(--accent-deep);font-weight:800;white-space:nowrap}
+  .cast-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+  .cast-mini{background:var(--paper);border:1px solid var(--border);border-radius:14px;padding:12px 13px;display:flex;gap:10px;align-items:flex-start;box-shadow:var(--shadow)}
+  .cast-mini .cem{font-size:27px;line-height:1;flex-shrink:0}
+  .cast-mini .crl{font-size:9.5px;color:var(--brand);font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px}
+  .cast-mini .cnm{font-family:'Baloo 2';font-weight:800;font-size:14px;line-height:1}
+  .cast-mini .cln{font-family:'Fraunces';font-style:italic;font-size:11px;color:var(--ink-soft);line-height:1.35;margin-top:4px}
+  @media(max-width:860px){.cast-strip{grid-template-columns:1fr 1fr}}
+  .cardfoot{display:flex;align-items:flex-end;gap:8px;margin-top:11px}
+  .cardfoot .srcchips{flex:1;margin-top:0}
+  .ch-right{margin-left:auto;display:flex;align-items:center;gap:6px}
+  .ch-right .vbadge{margin-left:0}
+  .fresh-chip{font-size:8.5px;font-weight:800;padding:2px 8px;border-radius:20px;font-family:'JetBrains Mono';letter-spacing:.02em;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+  .fc-fresh{background:#E7F5EC;color:#2E8B57}
+  .fc-comp{background:var(--accent-pale);color:var(--accent-deep)}
+  .dir-badge{font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;font-family:'JetBrains Mono'}
+  .dir-hot{background:#FDECEA;color:#C0392B}.dir-cool{background:#E7F5EC;color:#2E8B57}.dir-flat{background:#EFEDE7;color:#8A8175}
+
+  .mom-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+  .mom-col{background:var(--paper);border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--shadow)}
+  .mom-col h4{font-size:15px;margin:0 0 12px;display:flex;align-items:center;gap:7px;color:var(--brand)}
+  .mom-item{display:flex;gap:9px;padding:9px 0;border-bottom:1px dashed var(--border);font-size:12.5px;line-height:1.4}
+  .mom-item:last-child{border-bottom:none}
+  .mchip{font-size:8.5px;font-weight:800;padding:2px 7px;border-radius:20px;height:fit-content;white-space:nowrap;font-family:'JetBrains Mono'}
+  .mup{background:#E7F5EC;color:#2E8B57}.mdown{background:#FDF3DA;color:#B9791B}
+
+  /* Hero band */
+  .ride-hero{background:linear-gradient(120deg,var(--brand-deep),var(--brand) 62%,var(--brand-mid));color:#fff;border-radius:20px;padding:22px 24px;margin-bottom:20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;position:relative;overflow:hidden}
+  .ride-count{background:var(--accent);color:var(--brand-deep);font-family:'Baloo 2';font-weight:900;font-size:15px;padding:8px 15px;border-radius:30px;display:flex;align-items:center;gap:7px;white-space:nowrap}
+  .ride-hero h2{font-size:20px;margin:0 0 3px;font-weight:900}
+  .ride-hero p{margin:0;font-size:12.5px;color:#E4DBF7}
+  .ride-meta{margin-left:auto;text-align:right;font-size:11px;color:#CFC2EE;font-family:'JetBrains Mono'}
+
+  .pillar-head{display:flex;align-items:center;gap:9px;margin:22px 0 12px}
+  .pillar-sw{width:16px;height:16px;border-radius:6px}
+  .pillar-head h3{font-size:18px;font-weight:800;margin:0;color:var(--brand)}
+  .pillar-head .ct{font-size:11px;color:var(--ink-soft);font-family:'JetBrains Mono';margin-left:auto}
+
+  .brief{background:var(--paper);border:1px solid var(--border);border-radius:var(--r);padding:14px 14px 12px;cursor:pointer;position:relative;overflow:hidden;box-shadow:var(--shadow);transition:.15s;display:flex;flex-direction:column}
+  .brief:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+  .brief .rail{position:absolute;left:0;top:0;bottom:0;width:5px}
+  .brief-top{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+  .conv{font-size:9.5px;font-weight:800;padding:3px 8px;border-radius:20px;font-family:'JetBrains Mono';cursor:help;position:relative}
+  .cHIGH{background:#E7F5EC;color:#2E8B57}.cMEDIUM{background:#FDF3DA;color:#B9791B}.cWATCH{background:#EFEDE7;color:#8A8175}
+  .brief h4{font-family:'Fraunces';font-size:14px;font-weight:600;line-height:1.32;margin:0 0 11px;flex:1}
+  .brief-bottom{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .nobaby{font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;background:#E5F6FA;color:var(--teal);font-family:'JetBrains Mono'}
+  .anchor-tag{font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;background:var(--accent-pale);color:var(--accent-deep);font-family:'JetBrains Mono'}
+  .tip{position:absolute;bottom:130%;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 12px;border-radius:10px;font-size:11px;font-weight:600;width:214px;z-index:40;box-shadow:var(--shadow-lg);font-family:'Nunito';line-height:1.5;display:none}
+  .conv:hover .tip{display:block}
+  .tip b{color:var(--accent)}
+
+  /* Casting meter */
+  .meter-card{background:var(--paper);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;margin-bottom:18px;box-shadow:var(--shadow)}
+  .meter-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .meter-top h3{font-size:16px;margin:0;color:var(--brand)}
+  .meter-bar{height:26px;border-radius:14px;background:var(--cream-deep);overflow:hidden;display:flex;margin:12px 0 8px;border:1px solid var(--border)}
+  .meter-fill{background:linear-gradient(90deg,var(--teal),#3bbcd8);display:flex;align-items:center;justify-content:flex-end;padding-right:10px;font-size:11px;font-weight:800;color:#fff;font-family:'JetBrains Mono'}
+  .meter-rest{flex:1;display:flex;align-items:center;padding-left:10px;font-size:11px;font-weight:700;color:var(--ink-soft);font-family:'JetBrains Mono'}
+  .meter-legend{display:flex;gap:18px;font-size:11.5px;color:var(--ink-soft);flex-wrap:wrap}
+  .meter-legend b{color:var(--ink)}
+
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(28,20,48,.55);backdrop-filter:blur(3px);z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+  .modal{background:var(--cream);border-radius:22px;max-width:680px;width:100%;box-shadow:var(--shadow-lg);position:relative;margin-bottom:40px;animation:rise .25s ease}
+  @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  .modal-hero{background:linear-gradient(120deg,var(--brand-deep),var(--brand));color:#fff;padding:24px 28px;border-radius:22px 22px 0 0;position:relative}
+  .x{position:absolute;top:16px;right:18px;background:rgba(255,255,255,.16);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:17px;cursor:pointer;line-height:1}
+  .x:hover{background:rgba(255,255,255,.3)}
+  .modal-body{padding:22px 28px 28px}
+  .m-sec{margin-bottom:20px}
+  .m-sec-label{font-family:'JetBrains Mono';font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--brand);font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:7px}
+  .hookrow{background:var(--paper);border:1px solid var(--border);border-radius:12px;padding:11px 13px;margin-bottom:8px;font-size:13.5px;line-height:1.4;position:relative}
+  .hookrow.rec{border-color:var(--green);background:#F3FAF0}
+  .rec-tag{font-size:8.5px;font-weight:800;color:var(--green);font-family:'JetBrains Mono';letter-spacing:.08em;position:absolute;top:8px;right:11px}
+  .intel-row{display:flex;gap:9px;align-items:flex-start;background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:7px;font-size:12.5px;line-height:1.4}
+  .capvar{background:var(--paper);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:9px}
+  .capvar .cvlabel{font-family:'JetBrains Mono';font-size:9px;letter-spacing:.08em;color:var(--ink-soft);font-weight:700;text-transform:uppercase;margin-bottom:5px;display:flex;justify-content:space-between}
+  .capvar p{margin:0;font-size:13px;line-height:1.5}
+  .copybtn{background:var(--cream-deep);border:none;font-size:9px;font-weight:800;padding:2px 8px;border-radius:20px;cursor:pointer;font-family:'JetBrains Mono';color:var(--ink-soft)}
+  /* phone shot list */
+  .phone-row{display:flex;gap:11px;overflow-x:auto;padding-bottom:6px}
+  .phone{min-width:174px;width:174px;height:304px;background:var(--ink);border-radius:20px;padding:6px;flex-shrink:0;position:relative}
+  .phone-screen{background:linear-gradient(165deg,var(--brand-light),#fff);border-radius:15px;height:100%;padding:11px 11px 10px;display:flex;flex-direction:column}
+  .phone-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .phone-scene{font-family:'JetBrains Mono';font-size:8.5px;color:var(--brand);font-weight:800;letter-spacing:.06em}
+  .phone-sec{font-family:'JetBrains Mono';font-size:8px;color:var(--ink-soft);font-weight:700;background:var(--cream-deep);padding:1px 6px;border-radius:20px}
+  .phone-do{font-size:11px;line-height:1.42;color:var(--ink);font-weight:600}
+  .phone-osd{margin-top:9px;background:rgba(42,21,51,.86);color:#fff;font-size:10px;line-height:1.35;font-weight:700;padding:6px 8px;border-radius:8px;align-self:flex-start;max-width:100%}
+  .phone-osd .osl{display:block;font-family:'JetBrains Mono';font-size:7px;letter-spacing:.1em;opacity:.7;margin-bottom:2px;font-weight:800}
+  .phone-cap{margin-top:auto;padding-top:8px;font-size:8px;color:var(--ink-soft);line-height:1.3;font-family:'JetBrains Mono'}
+  .words-sub{font-family:'JetBrains Mono';font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);font-weight:700;margin-bottom:7px}
+  .panel-head{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:11px;flex-wrap:wrap}
+  .panel-note{font-size:11.5px;color:var(--ink-soft);font-style:italic;font-family:'Fraunces';line-height:1.4;flex:1;min-width:170px}
+  .panel-run{background:var(--brand);color:#fff;border:none;font-family:'JetBrains Mono';font-size:10px;font-weight:800;letter-spacing:.04em;padding:7px 12px;border-radius:20px;cursor:pointer;white-space:nowrap}
+  .panel-run:disabled{opacity:.55;cursor:default}
+  .panel-live-badge{font-family:'JetBrains Mono';font-size:8px;font-weight:800;letter-spacing:.08em;color:var(--green);background:#F3FAF0;border:1px solid var(--green);padding:3px 8px;border-radius:20px}
+  .panel-share{margin-left:auto;font-family:'JetBrains Mono';font-size:8px;color:var(--ink-soft);font-weight:700}
+  /* panel */
+  .panel-react{background:var(--paper);border:1px solid var(--border);border-radius:12px;padding:11px 13px;margin-bottom:8px;display:flex;gap:11px;align-items:flex-start}
+  .panel-av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:17px;flex-shrink:0;background:var(--brand-light)}
+  .panel-name{font-weight:800;font-size:12.5px}
+  .panel-score{margin-left:auto;font-family:'JetBrains Mono';font-size:11px;font-weight:800;padding:2px 8px;border-radius:20px}
+  .panel-line{font-size:12px;color:var(--ink-soft);font-style:italic;font-family:'Fraunces';line-height:1.4;margin-top:2px}
+  details.acc{background:var(--paper);border:1px solid var(--border);border-radius:12px;margin-bottom:9px;overflow:hidden}
+  details.acc summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:800;font-size:13px;display:flex;align-items:center;gap:8px;font-family:'Nunito'}
+  details.acc summary::-webkit-details-marker{display:none}
+  details.acc[open] summary{border-bottom:1px solid var(--border)}
+  .acc-body{padding:12px 14px;font-size:12.5px;line-height:1.55;color:var(--ink-soft)}
+  .chev{margin-left:auto;transition:.2s}
+  details.acc[open] .chev{transform:rotate(180deg)}
+
+  /* Performance chart */
+  .perf-card{background:var(--paper);border:1px solid var(--border);border-radius:var(--r);padding:22px 24px;box-shadow:var(--shadow);margin-bottom:16px}
+  .perf-card h3{font-size:19px;margin:0 0 3px;color:var(--brand)}
+  .perf-card .sub{font-family:'Fraunces';font-style:italic;color:var(--ink-soft);font-size:13.5px;margin-bottom:18px}
+  .bar-row{display:flex;align-items:center;gap:12px;margin-bottom:9px}
+  .bar-label{width:190px;font-size:11.5px;font-weight:700;text-align:right;flex-shrink:0;line-height:1.25}
+  .bar-track{flex:1;height:22px;background:var(--cream);border-radius:6px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:0 6px 6px 0;min-width:4px}
+  .bar-val{width:52px;flex-shrink:0;font-family:'JetBrains Mono';font-size:11.5px;font-weight:800;white-space:nowrap;text-align:left}
+  .perf-legend{display:flex;gap:20px;margin:16px 0 4px;font-size:12px;font-weight:700}
+  .perf-legend span{display:flex;align-items:center;gap:6px}
+  .sw{width:13px;height:13px;border-radius:4px}
+  .perf-punch{background:var(--brand-light);border-left:4px solid var(--brand);border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.5;margin-top:16px}
+  .funnel{display:flex;align-items:center;gap:10px;margin:18px 0 4px;flex-wrap:wrap}
+  .fstep{flex:1;min-width:130px;background:var(--cream);border:1px solid var(--border);border-radius:14px;padding:16px 12px;text-align:center}
+  .fstep .fnum{font-family:'Baloo 2';font-weight:900;font-size:27px;line-height:1}
+  .fstep .flbl{font-size:11.5px;color:var(--ink-soft);margin-top:5px;line-height:1.3}
+  .farrow{font-family:'JetBrains Mono';font-size:15px;color:var(--ink-soft);flex-shrink:0}
+  @media(max-width:600px){.funnel{flex-direction:column}.farrow{transform:rotate(90deg)}}
+
+  /* Milestone Map */
+  .mm-bands{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+  .mm-band{flex:1;min-width:130px;background:var(--paper);border:2px solid var(--border);border-radius:14px;padding:12px;cursor:pointer;transition:.15s;text-align:center}
+  .mm-band:hover{border-color:var(--brand-mid)}
+  .mm-band.on{border-color:var(--brand);background:var(--brand-light)}
+  .mm-band .age{font-family:'Baloo 2';font-weight:900;font-size:17px;color:var(--brand)}
+  .mm-band .lbl{font-size:10.5px;color:var(--ink-soft);font-weight:700;margin-top:2px}
+  .mm-detail{background:var(--paper);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+  .mm-flow{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)}
+  .mm-step{background:var(--paper);padding:16px}
+  .mm-step:last-child{background:var(--brand-light)}
+  .mm-step .mstage{font-family:'JetBrains Mono';font-size:9px;letter-spacing:.1em;color:var(--ink-soft);font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+  .mm-step h4{font-size:14px;margin:0 0 6px;color:var(--brand)}
+  .mm-step p{font-size:12px;color:var(--ink-soft);line-height:1.5;margin:0}
+  .mm-cta{padding:14px 18px;background:var(--brand-deep);color:#fff;font-size:12.5px;display:flex;align-items:center;gap:10px}
+
+  /* how it works */
+  .flow-rail{display:flex;align-items:center;gap:0;margin:20px 0;overflow-x:auto;padding-bottom:6px}
+  .flow-node{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:16px;flex-shrink:0;cursor:pointer;border:2px solid var(--border);background:var(--paper);transition:.25s}
+  .flow-node.done{background:var(--brand);border-color:var(--brand);color:#fff}
+  .flow-node.active{background:var(--accent);border-color:var(--accent-deep);transform:scale(1.18);box-shadow:0 0 0 5px rgba(246,217,59,.3)}
+  .flow-line{height:3px;width:26px;background:var(--border);flex-shrink:0}
+  .flow-line.fill{background:var(--brand)}
+  .flow-card{background:var(--paper);border:1px solid var(--border);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow)}
+  .fc-agent{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .fc-agent .g{width:40px;height:40px;border-radius:12px;background:var(--brand-light);display:grid;place-items:center;font-size:18px}
+  .watch-chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+  .watch-chip{font-size:10px;background:var(--cream);border:1px solid var(--border);padding:3px 9px;border-radius:20px;font-family:'JetBrains Mono';color:var(--ink-soft)}
+  .verdict{background:#F1FAF0;border:1px solid #BFE3CD;border-radius:11px;padding:11px 13px;font-size:12.5px;margin-top:12px;line-height:1.5}
+  .incoming{font-size:10px;font-family:'JetBrains Mono';color:var(--ink-soft);background:var(--cream);padding:3px 9px;border-radius:20px;display:inline-block;margin-bottom:8px}
+  .step-band{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:18px 0}
+  .step-cell{background:var(--paper);padding:16px}
+  .step-cell.you{background:var(--brand-deep);color:#fff}
+  .step-num{font-family:'JetBrains Mono';font-size:11px;color:var(--ink-soft);border-bottom:1px dashed var(--border);padding-bottom:5px;margin-bottom:8px}
+  .step-cell.you .step-num{color:#C9BEE8;border-color:rgba(255,255,255,.2)}
+  .step-cell h4{font-size:15px;margin:0 0 5px;color:var(--brand)}
+  .step-cell.you h4{color:#fff}
+  .step-cell p{font-size:11.5px;color:var(--ink-soft);margin:0;line-height:1.45}
+  .step-cell.you p{color:#E4DBF7}
+
+  .wip-banner{background:repeating-linear-gradient(45deg,var(--accent-pale),var(--accent-pale) 10px,#FBF0C4 10px,#FBF0C4 20px);border:1.5px dashed var(--accent-deep);border-radius:14px;padding:16px 18px;margin-bottom:16px}
+  .wip-banner .tag{font-family:'JetBrains Mono';font-size:9.5px;font-weight:800;letter-spacing:.1em;color:var(--brand);background:#fff;padding:3px 9px;border-radius:20px;display:inline-block;margin-bottom:8px}
+  .wip-banner p{margin:0;font-size:12.5px;line-height:1.5;color:var(--ink-soft)}
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}
+  .kpi{background:var(--paper);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative;overflow:hidden;text-align:center}
+  .kpi .soon{position:absolute;inset:0;display:grid;place-items:center;font-family:'Baloo 2';font-size:34px;font-weight:900;color:rgba(74,30,158,.06)}
+  .kpi .kv{font-family:'Baloo 2';font-size:26px;font-weight:900;color:var(--ink-soft);position:relative}
+  .kpi .kl{font-size:10.5px;color:var(--ink-soft);position:relative;margin-top:3px}
+  .foot{text-align:center;padding:30px;font-family:'JetBrains Mono';font-size:10px;color:var(--ink-soft);margin-top:20px}
+  .decision-row{display:flex;gap:12px;align-items:flex-start;background:var(--paper);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+  .dverb{font-size:9.5px;font-weight:800;padding:3px 9px;border-radius:20px;font-family:'JetBrains Mono';white-space:nowrap;height:fit-content}
+  .d-prom{background:#E7F5EC;color:#2E8B57}.d-kill{background:#FDECEA;color:#C0392B}.d-queue{background:var(--brand-light);color:var(--brand)}.d-esc{background:#FDF3DA;color:#B9791B}
+
+  .amb-card{background:var(--paper);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;position:relative;overflow:hidden}
+  .amb-card .rail{position:absolute;left:0;top:0;bottom:0;width:5px}
+  .amb-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .amb-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--teal));display:grid;place-items:center;color:#fff;font-family:'Baloo 2';font-weight:900;font-size:15px}
+  .amb-handle{font-weight:800;font-size:13px}
+  .amb-name{font-size:11px;color:var(--ink-soft)}
+  .status-pill{font-size:9px;font-weight:800;padding:2px 8px;border-radius:20px;font-family:'JetBrains Mono';margin-left:auto}
+  .st-watch{background:var(--accent-pale);color:var(--accent-deep)}
+
+  .studio-teaser{background:linear-gradient(135deg,var(--brand-deep),var(--brand));border-radius:20px;padding:34px;color:#fff;text-align:center}
+  .studio-teaser h2{font-size:26px;margin:12px 0 8px;font-weight:900}
+  .studio-teaser p{font-size:13.5px;color:#E4DBF7;max-width:520px;margin:0 auto 18px;line-height:1.55}
+  .st-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;max-width:560px;margin:0 auto}
+  .st-c{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:12px 14px;text-align:left;font-size:12.5px}
+  .st-c .stq{font-family:'Fraunces';font-style:italic}
+  /* Studio chat */
+  .studio{display:flex;flex-direction:column;height:calc(100vh - 176px);min-height:440px;background:var(--paper);border:1px solid var(--border);border-radius:18px;overflow:hidden}
+  .st-ctx{background:linear-gradient(120deg,var(--brand-deep),var(--brand));color:#fff;padding:10px 16px;display:flex;align-items:center;gap:11px;font-size:12.5px}
+  .st-ctx .stx-lbl{font-family:'JetBrains Mono';font-size:8.5px;letter-spacing:.1em;opacity:.85;text-transform:uppercase;white-space:nowrap}
+  .st-ctx b{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .st-ctx .stx-x{margin-left:auto;background:rgba(255,255,255,.2);border:none;color:#fff;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:14px;line-height:1;flex-shrink:0}
+  .st-scroll{flex:1;overflow-y:auto;padding:22px}
+  .st-empty{max-width:580px;margin:5vh auto 0;text-align:center}
+  .st-empty h2{font-size:24px;font-weight:900;margin:10px 0 6px}
+  .st-empty p{font-size:13px;color:var(--ink-soft);line-height:1.55;margin:0 auto 20px;max-width:470px}
+  .st-sugg{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:580px;margin:0 auto}
+  .st-sg{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 13px;text-align:left;cursor:pointer;font-size:12.5px;line-height:1.4;color:var(--ink);transition:.12s}
+  .st-sg:hover{border-color:var(--brand);background:var(--brand-light)}
+  .st-sg .sgl{display:block;font-family:'JetBrains Mono';font-size:8px;letter-spacing:.08em;color:var(--brand);margin-bottom:4px;font-weight:800}
+  .msg{display:flex;gap:10px;margin-bottom:16px;max-width:780px}
+  .msg.user{margin-left:auto;flex-direction:row-reverse}
+  .msg-av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:15px;flex-shrink:0}
+  .msg.user .msg-av{background:var(--purple);color:#fff}
+  .msg.bot .msg-av{background:var(--brand);color:#fff}
+  .msg-bub{border-radius:14px;padding:11px 15px;font-size:13.5px;line-height:1.6}
+  .msg.user .msg-bub{background:var(--purple);color:#fff}
+  .msg.bot .msg-bub{background:#fff;border:1px solid var(--border);color:var(--ink)}
+  .msg-bub p{margin:0 0 9px} .msg-bub p:last-child{margin-bottom:0}
+  .msg-bub h3{font-size:14.5px;font-weight:800;margin:12px 0 6px} .msg-bub h3:first-child{margin-top:0}
+  .msg-bub h4{font-size:13px;font-weight:800;margin:10px 0 5px}
+  .msg-bub ul,.msg-bub ol{margin:4px 0 9px;padding-left:20px} .msg-bub li{margin-bottom:4px}
+  .msg-bub code{background:var(--cream-deep);padding:1px 5px;border-radius:5px;font-size:12px;font-family:'JetBrains Mono'}
+  .msg-bub blockquote{border-left:3px solid var(--brand);margin:6px 0;padding:2px 0 2px 12px;color:var(--ink-soft);font-style:italic}
+  .msg-bub hr{border:none;border-top:1px solid var(--border);margin:10px 0}
+  .msg-bub a{color:var(--brand);font-weight:700}
+  .blink::after{content:'▍';animation:bl 1s steps(1) infinite;color:var(--brand);margin-left:1px}
+  @keyframes bl{50%{opacity:0}}
+  .st-err{max-width:780px;margin:0 0 16px;background:#FFF4E5;border:1px solid var(--warn);border-radius:12px;padding:11px 14px;font-size:12.5px;color:var(--ink-soft);line-height:1.5}
+  .st-inputbar{border-top:1px solid var(--border);padding:12px 14px;display:flex;gap:10px;align-items:flex-end;background:#fff}
+  .st-input{flex:1;border:1px solid var(--border);border-radius:14px;padding:11px 14px;font-size:13.5px;font-family:'Nunito';resize:none;max-height:120px;line-height:1.4;outline:none}
+  .st-input:focus{border-color:var(--brand)}
+  .st-send{background:var(--brand);color:#fff;border:none;width:40px;height:40px;border-radius:50%;font-size:17px;cursor:pointer;flex-shrink:0}
+  .st-send:disabled{opacity:.5;cursor:default}
+
+  @media(max-width:860px){
+    .app{grid-template-columns:1fr}
+    .side{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center}
+    .side-spacer{display:none;flex:0}
+    .grid-2,.grid-3,.mom-cols,.st-cards,.mm-flow,.step-band,.kpi-grid{grid-template-columns:1fr}
+    .bar-label{width:110px}
+    .page-head h1{font-size:25px}
+    .wrap,.page-head{padding-left:18px;padding-right:18px}
+  }
+</style>
+</head>
+<body data-palette="#E5309A,#7C3AED,#5CB85C,#F5A623,#3AA6E0,#C6F135">
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+const {useState,useRef,useEffect} = React;
+const WEEK = "July 15–21, 2026";
+
+const PILLARS = {
+  CP:{name:"THE CRUNCH PARTY", short:"The Crunch Party", color:"var(--magenta)", glyph:"🎉"},
+  ST:{name:"A SEAT AT THE TABLE", short:"A Seat at the Table", color:"var(--purple)", glyph:"⭐"},
+  CC:{name:"CRAVE THE CRUNCH", short:"Crave the Crunch", color:"var(--green)", glyph:"😋"},
+  XP:{name:"CRASH THE PARTY", short:"Crash the Party", color:"var(--orange)", glyph:"🕺"},
+};
+const DNA = {"mascot-bit":"🥑","syd-host":"⭐","crunch-asmr":"🔊","trend-jack":"⚡","reply-guy":"💬","ingredient-flex":"🏷️","seat-at-the-table":"🪑","flavor-drop":"🎊","creator-ugc":"🤝"};
+
+const PERF_PERSONALITY = [["Nutter Butter — a plain cookie + a weird little universe",700000]];
+const PERF_ONBAG = [["LesserEvil — great snack, mascots kept on the bag",132000],["Hippeas — great snack, product-shot feed",102000],["Chasin’ Dreams — a whole world + a cast, still on the bag",5200]];
+const PERF_MAX = 700000;
+
+const PANEL = [
+  {key:"chloe",name:"Celiac Chloe",emoji:"🌾",bio:"Gluten-free for life, buys on trust, and tells every GF friend the second she finds a safe brand she loves.",loves:["gf","inclusion","trust"], pos:"Finally — a fun snack I can actually eat. Sharing this everywhere.", neu:"Looks fun, but is it actually safe for me? Say it clearly."},
+  {key:"kayla",name:"Clean-Label Kayla",emoji:"🥑",bio:"Reads the back of every bag. Rewards a short, clean label + avocado oil — but rolls her eyes at fear-mongering.",loves:["clean","avocado","label"], pos:"Six ingredients and avocado oil? Into it — no lecture needed.", neu:"Fine, but don’t preach at me. Just show me the label."},
+  {key:"sage",name:"Snack-Girlie Sage",emoji:"✨",bio:"Gen Z, follows brands that are a whole vibe. Wants to be entertained, not sold to. Lives on TikTok.",loves:["fun","mascot","trend"], pos:"Okay the disco avocado is iconic, I’m obsessed. Following.", neu:"Cute product, but the feed’s kinda boring, not gonna lie."},
+  {key:"mara",name:"Lunchbox-Mom Mara",emoji:"🎒",bio:"Buys for her GF kid. Highest lifetime value. Wants her kid included at the snack table — and to trust the label.",loves:["inclusion","gf","clean","lunchbox"], pos:"A snack my kid can bring and not feel left out? Sold. Repeat buy.", neu:"Looks fun, but I need to trust it before it’s in the lunchbox."},
+];
+function panelReact(b){
+  const tags=b.panelTags||[];
+  return PANEL.map(p=>{
+    const hit=tags.filter(t=>p.loves.includes(t)).length;
+    const score=Math.min(96, 58 + hit*15 + (b.anchor?4:0));
+    return {p, score, line: hit>0?p.pos:p.neu, band: score>=82?"hi":score>=70?"mid":"lo"};
+  });
+}
+
+const CAST = [
+  {name:"Avo", emoji:"🥑", role:"The Bougie Bouncer", trait:"The cool one who’s pretty sure he’s the main character.", says:"“Only the best get past the velvet rope.”", truth:"Avocado oil, never seed oils — the premium flex.", bit:"Avo works the door of the Crunch Party, deciding which snacks are VIP enough to get in. (Spoiler: the seed-oil snacks get bounced.)"},
+  {name:"Sorghum", emoji:"🌾", role:"The Comeback Underdog", trait:"A 10,000-year-old grain making a serious comeback. Everyone roots for it.", says:"“Never heard of me? Oh, you will.”", truth:"US-grown, drought-resilient, naturally gluten-free ancient grain.", bit:"Sorghum’s motivational-speaker era: ‘move over corn.’ The hero ingredient nobody knows yet — until they can’t stop talking about it."},
+  {name:"Rice", emoji:"🍚", role:"The Steady One", trait:"Wholesome, dependable, keeps Avo and Sorghum from spiraling. The golden-retriever friend.", says:"“A timeless classic that never goes out of style.”", truth:"Whole-grain brown rice — the reliable base of every puff.", bit:"Rice is the responsible one making sure everyone at the party gets home safe. Deeply uncool, secretly the glue that holds the cast together."},
+  {name:"Syd", emoji:"⭐", role:"The Host", trait:"Founder, celiac since 7, farm girl. Warm, funny, real — runs the whole Crunch Party.", says:"“Everyone deserves a seat at the snack table.”", truth:"Built the snack little Syd always wished she had.", bit:"Syd hosts: the origin story, the factory demos, the comment replies, and the cast intros. The human heart of the party."},
+];
+
+const WELCOME_HIGHLIGHTS = [
+  {t:"The World Cup Final is Saturday — the biggest snack day of summer", d:"Jul 19, 3pm ET. Snacks are the #1 thing people buy for it (~$7.5B; 51% grab chips + dips). Run a watch-party board now — and a champion post the day after, when almost no brand bothers."},
+  {t:"Food Jutsu is peaking THIS week", d:"The zero-production 'summon the snack on the beat' trend is at days 4–10 of its life. Summon the Crunch Party cast with it now, before it cools."},
+  {t:"Cheetos just proved your flavor is a hit", d:"Their Flamin' Hot Dill Pickle Puffs became the fastest-selling launch they've ever had — and went permanent. Dill Pickle is a main-character flavor, and you already have it. Make it a hero."},
+];
+const WELCOME_MOVES = [
+  {t:"Ride Food Jutsu before it cools", d:"Shoot a ‘summon the Crunch Party’ Food Jutsu this week — a prop mascot or a bag reveal on the beat. It's the #1 food format right now and at days 4–10 of its life, so it's peaking. Zero budget, native, done in an afternoon."},
+  {t:"Own the whole World Cup weekend — including Sunday", d:"Post a ‘build your watch-party board’ before Saturday, react to the matchup, then run the champion / recovery-snacks post the day after (Jul 20–24) — the one almost no brand bothers with. Snacks are the #1 thing people buy for the final."},
+  {t:"Make Dill Pickle the hero this week", d:"Cheetos just made Flamin' Hot Dill Pickle their fastest-selling launch ever. Run a Dill Pickle flavor-drop with a sunglasses-pickle cameo and ride a flavor the biggest snack brand in the world just proved. It's your most social-native SKU."},
+];
+const GREEN_SHOOTS = [
+  {t:"The Mascot Cast content engine", size:"medium", horizon:"this-quarter", territory:"owned characters", move:"Write a one-line personality bible per ingredient + start with cheap prop/POV bits. The M&M’s ensemble model = content forever, and it’s the asset no rival has."},
+  {t:"Syd as recurring host", size:"small", horizon:"test-now", territory:"founder-led reach", move:"Turn Syd’s founder-POV into a weekly thing (the Poppi playbook — un-produced, from the kitchen or the plant). Warm, cheap, and it’s your most engaging lane."},
+  {t:"The ‘Crunch Crew’ ambassador pod", size:"medium", horizon:"this-quarter", territory:"community + UGC", move:"Stand up a perks-first pod of GF micro-creators + lunchbox moms + snack-reviewers (the LesserEvil ‘Clean Snack Crew’ model). Low cash, recurring content."},
+  {t:"TikTok Shop + seed-first affiliate", size:"small", horizon:"test-now", territory:"content → sales", move:"Open a TikTok Shop, seed the big snack-review accounts (@snackolator, @markie_devo), and let their videos earn on every bag. Turns gifting into sales."},
+];
+const TICKER = [
+  ["pulse","World Cup Final Sat Jul 19 — 51% of viewers buy chips + dips (~$7.5B spent)"],
+  ["win","Cheetos Flamin' Hot Dill Pickle Puffs = their fastest-selling launch ever — your flavor's a hit"],
+  ["pulse","Food Jutsu trend at days 4–10 — zero-budget, mascot-castable, ride it now"],
+  ["signal","'Fiber is the next protein' (PepsiCo CEO) — sorghum's fiber + GF profile is dead-on"],
+  ["decision","PROMOTED: activate the mascot cast (Avo · Sorghum · Rice)"],
+  ["signal","Avocado-oil clean-label still rising — ride it as pride, never the seed-oil crusade"],
+  ["win","Small brands break out on founder-story + volume (Behave, Candeeze) — Syd's the unlock"],
+  ["decision","KILLED: bare 'spotted on the shelf' shots (~9 likes)"],
+  ["signal","Mascots win awareness · the founder drives conversion — run both"],
+  ["warn","ESCALATED: seed the snack-reviewers + open TikTok Shop before Saturday"],
+];
+const TRENDS = [
+  {glyph:"🥑", type:"CLEAN-LABEL WAVE", v:"high", live:false, h:"'Avocado oil, never seed oils' is still rising — ride it as pride", d:"It keeps climbing: ~28% of US shoppers avoid seed oils, tallow is up ~275% (to ~$1.1B), and PepsiCo, Kraft, GM and Nestlé are all reformulating away from seed oils. But two things sharpened this month: it's now politically-coded, and peer-reviewed science pushed back hard on the 'seed oils are toxic' claim. So it's a real tailwind — for the POSITIVE flex, not the crusade.", play:"Say 'made with avocado oil, never seed oils' once, proudly, as who you are. Never argue the science, never go political — the fun disco voice is the whole risk mitigation.", drove:"CC-0715-2", pillars:["CC"], src:[["brightfieldgroup.com","Seed-oil-free clean label"],["foodnavigator-usa.com","Big CPG drops seed oils"]]},
+  {glyph:"🌾", type:"CATEGORY TAILWIND", v:"high", live:false, h:"'Fiber is the next protein' — and sorghum is dead-on", d:"PepsiCo's CEO literally called fiber 'the next protein.' Protein fatigue is setting in, GLP-1 is pushing the aisle toward protein-plus-fiber and smaller 'permissible indulgence' packs, and 'puffed ancient grains' is a written-up 2026 trend in its own right. Sorghum's fiber + low-GI + gluten-free profile lands in the exact center of that — and almost nobody is telling the story.", play:"Own the sorghum-fiber story before the big guys do. Sorghum's 'never heard of me? oh, you will' comeback bit IS this trend — heritage grain, quietly on-trend nutrition, told as personality.", drove:"CP-0715-4", pillars:["CP","CC"], src:[["foodnavigator-usa.com","Fiber is the next protein"],["foodbusinessnews.net","Puffed ancient grains"]]},
+  {glyph:"🎭", type:"STRATEGY", v:"high", live:false, h:"Mascots win awareness — the founder drives conversion. Run both.", d:"The sharpest tactical finding: UGC out-converts brand-made content by ~40%, and the pattern across breakouts is that a MASCOT/character wins reach + awareness while the FOUNDER drives sales. Behave (woman-owned) went from ~60 days of cash to ~2,000 Target doors, and Candeeze hit 33M+ organic views + #1 in its TikTok Shop category — both on founder-story videos posted at brutal volume (4–5×/day), not polished product shots.", play:"Run two engines: the cast for reach (top of funnel), Syd's founder-story for conversion (bottom). And post at real volume — the winners post several times a day, not weekly.", drove:"ST-0715-3", pillars:["ST","CP"], src:[["marketingbrew.com","Small-brand breakouts"],["getsaral.com","Founder-led social"]]},
+  {glyph:"🔇", type:"THE OPENING", v:"high", live:false, h:"The whole better-for-you snack category has no voice", d:"We tore down how BFY snack brands do social — they're boring. Even LesserEvil (~132K) keeps its mascots on the bag; Cosmos (~1.4K) and Snacklins (~379 on TikTok despite ~$13M revenue) run product-shot feeds. Following here came from budget, IP, or family scale — not content. The brands that actually win food (Nutter Butter, Poppi, Dude Wipes, Fishwife) win on personality.", play:"Win the personality lane everyone's ignoring. You already own a world + a cast — put them in motion and you can leapfrog brands 20× your size on content, not budget.", drove:"CP-0715-1", pillars:["CP"], src:[["marketingbrew.com","Nutter Butter strategy"]]},
+  {glyph:"🪩", type:"AESTHETIC TAILWIND", v:"high", live:false, h:"Y2K/disco nostalgia is peaking — and it's literally your brand", d:"Y2K/retro-futurist design is one of the defining aesthetics of 2026 — the Washington Post mapped the takeover this January, and a 2026 survey found ~63% of Gen Z are actively trying to unplug from today's AI-polished, algorithm-driven sameness. Y2K is the antidote they're reaching for. Your 'Crunch Party' world isn't just cute — it's the exact aesthetic winning attention right now.", play:"Lean the disco / checkerboard / velvet-rope world into the FEED, not just the bag. The culture is already there; you just have to show up in it.", drove:"CP-0715-1", pillars:["CP"], src:[["washingtonpost.com","Gen Z Y2K takeover · Jan 2026"]]},
+  {glyph:"🛒", type:"COMMERCE LEVER", v:"medium", live:false, h:"Seed-first + TikTok Shop affiliates is the cheap distribution engine", d:"Affiliates now drive ~42% of US TikTok Shop GMV. The winning play is two-track: seed 10–20 micro-creators at ~$30–80 each, grab Spark Ads codes upfront, then pay only to amplify the 2–3 that actually pop (3–8× ROI, 37–67% lower CPA than studio ads). A gifting program can start under $1K — just watch margin (effective cost of sale runs ~27–33%).", play:"Seed the snack-review + GF + mom micro-creators with a 'Crunch Party box,' open a TikTok Shop, and whitelist the winners as paid ads. Turns free product into sales. See Brand Ambassadors.", drove:"XP-0715-3", pillars:["XP"], src:[["bemomentiq.com","TikTok Shop affiliates"],["getsaral.com","Seeding playbook"]]},
+  {glyph:"🗓️", type:"SEASONAL RUNWAY", v:"high", live:false, h:"Don't go quiet between tentpoles — the baton-pass is the calendar", d:"The back half of summer is a relay a snack brand can ride without a gap: World Cup Final (Jul 19) → back-to-school lunchbox (September is now the #1 BTS shopping month) → tailgate/game-day (CFB opens Aug 27, NFL kicks off Sep 9) → awards-night watch parties (Emmys Sep 14, VMAs Sep 27) — with National Trail Mix Day (Aug 31, the single most on-brand food day) and National Guacamole Day (Sep 16) as bolt-ons.", play:"Map the baton-pass now so there's always a next moment. Trail Mix Day (Aug 31) and Guac Day (Sep 16, avocado-oil hero) are yours to own — nobody else fights for them.", drove:"XP-0715-1", pillars:["XP"], src:[["ncaa.com","CFB + NFL 2026"],["nationaldaycalendar.com","Food days"]]},
+  {glyph:"💛", type:"AUDIENCE WHITE SPACE", v:"medium", live:false, h:"The gluten-free community is starving for JOY, not just safety", d:"The GF/celiac community is small but rabidly loyal and vocal — and they rally HARD around fun launches (the January 2026 Cheez-It gluten-free launch set the community off). Almost every GF snack sells 'safe.' Almost none sells 'fun.' A joyful, GF-native brand founded by a celiac answers an under-served emotional need — belonging + delight, not just an ingredient list.", play:"Lean the 'seat at the snack table' inclusion story — the GF kid who finally gets a fun snack. Syd's celiac-since-7 story is the flag, and it's apolitical + unifying.", drove:"ST-0715-1", pillars:["ST"], src:[["newhope.com","GF community 2026"]]},
+  {glyph:"🏆", type:"POSITIONING", v:"medium", live:false, h:"Staying independent is a moat consumers defend", d:"Siete sold to PepsiCo and LesserEvil to Hershey — leaving you as the still-independent, woman-owned option. Consumers increasingly root for (and defend) the founder-owned brand over the acquired one, and it pairs perfectly with Syd's story: real farm, real founder, real celiac.", play:"Wear 'woman-owned, still-independent, founder-run' with pride — a genuine differentiator now that the category's consolidating around you.", drove:"ST-0715-2", pillars:["ST"], src:[["newhope.com","Naturally Rising finalists"]]},
+];
+const PULSE = [
+  {glyph:"⚽", type:"WATCH-PARTY MOMENT", v:"high", live:true, h:"World Cup Final, Saturday July 19 — the summer's #1 snack day", d:"Kickoff 3pm ET / 12pm PT at MetLife on FOX/Telemundo, with the first-ever World Cup halftime show — hundreds of millions watching, 24% of US viewers hosting a watch party, and snacks the #1 thing they buy (51% grab chips + dips, ~$7.5B total). It's the single biggest shareable-snack-bowl moment of the summer, and it's 4 days out.", play:"Three-part play: a 'build your watch-party board' post now, a quick matchup-reveal reactive (Jul 15–16), and — the one almost no brand runs — a champion-reaction / 'recovery snacks' post the day after (Jul 20–24). Rush it; the window closes Saturday.", terr:"THE MOMENT", drove:"XP-0715-1", pillars:["XP"], src:[["metlifestadium.com","World Cup Final"]]},
+  {glyph:"⚡", type:"VIRAL FORMAT", v:"high", live:true, h:"'Food Jutsu' — the zero-budget trend your mascots were made for", d:"The anime hand-sign → hard-cut-on-the-beat → food 'appears' format is the #1 food trend right now (36M+ posts) and needs no production — just a beat and a reveal. It's a perfect 'summon the Crunch Party' mechanic, and it's at days 4–10 of its lifespan, so it's peaking. (Note: use a Commercial-Music-Library reveal sound on the brand account, or the audio gets muted.)", play:"Shoot a 'summon the Crunch Party' Food Jutsu this week — a prop mascot or a bag reveal on the beat. High-completion, native, free. Move now.", terr:"FUN", drove:"CP-0715-2", pillars:["CP"], src:[["socialpilot.co","Trending TikTok formats"]]},
+  {glyph:"🥒", type:"FLAVOR MOMENT", v:"high", live:true, h:"Pickle + swicy is peaking — and Cheetos just validated your flavor", d:"Bold pickle + 'swicy' is a full-blown 2026 phenomenon: Cheetos' Flamin' Hot Dill Pickle became their fastest-selling limited-edition ever (now permanent, with a Puffs version debuting), Frito-Lay's Flavor Swap sold out twice, and Lay's trademarked 'Swicy.' Dill Pickle is a main-character flavor — and it's one of your three SKUs, with a mascot that basically draws itself.", play:"Make Dill Pickle a hero, not a footnote — a flavor-drop bit + a sunglasses-pickle cameo, riding a flavor the biggest snack brand just proved is a hit. It's your most social-native SKU.", terr:"CRAVE", drove:"CC-0715-3", pillars:["CC"], src:[["foodnavigator-usa.com","Dill pickle + swicy"]]},
+  {glyph:"🖼️", type:"FORMAT", v:"high", live:false, h:"Photo-Mode carousels are in an algorithm 'golden window'", d:"TikTok/IG are heavily rewarding Photo-Mode / carousel posts right now — reports show ~81% higher engagement than video for the format, and it's the cheapest possible content: no filming, no editing, just stills + text. For a 3-person team with a ready-made cast of illustrated characters, it's almost unfair.", play:"Turn the mascots + packaging art into carousels — 'which cast member are you,' 'the ingredient guest list,' a 3-slide flavor reveal. Zero filming, algorithm-favored, on-brand.", terr:"FUN", drove:"CP-0715-1", pillars:["CP"], src:[["socialpilot.co","Photo-mode carousels"]]},
+  {glyph:"🔊", type:"DURABLE FORMAT", v:"high", live:false, h:"ASMR crunch works — but it's gone subtle, not mukbang", d:"Crunch/ASMR is one of the most reliable food formats, and a puff is literally a crunch product. One shift to respect: ASMR has moved to subtle, realistic texture sound — the extreme, loud mukbang style now reads as cringe. Clean mic, close-up, one satisfying crunch.", play:"Make a weekly crunch-ASMR a staple — a slow pour, a close mic, one clean crunch (dill pickle hits). Cheapest high-performing format, and on-brand for 'a party in every crunch.'", terr:"CRAVE", drove:"CC-0715-1", pillars:["CC"], src:[["russh.com","ASMR food, subtle shift"]]},
+  {glyph:"🎥", type:"FORMAT", v:"medium", live:false, h:"Founder-story POV is the small-brand growth lever", d:"The clearest small-brand template: un-produced founder-story content posted at volume. Poppi's founder posts did $100K in 24 hours; Behave and Candeeze broke out on the founder's small-business-journey, several posts a day. It reads as human, not an ad — and it's Syd's most engaging existing lane.", play:"Turn Syd's founder-POV into a frequent staple — packing a World Cup seed box, a factory day, the celiac origin. Un-produced, honest, and posted often. The founder is your conversion engine.", terr:"HEART", drove:"ST-0715-3", pillars:["ST"], src:[["digiday.com","Founder-native TikTok"]]},
+  {glyph:"🍽️", type:"CULTURE", v:"medium", live:true, h:"Savory 'snack plate' / girl-dinner is the current clean-eating wave", d:"Savory-maxxing and 'girl dinner' snack-plate content is the live clean-eating format (fiber over protein, real-food grazing), and puffs slot straight into a build-your-own snack plate or grazing board.", play:"Show puffs on a real snack plate / grazing board — the 'better-for-you but still fun' spread. Rides a current wave and shows a usage occasion in one post.", terr:"CRAVE", drove:"CC-0715-1", pillars:["CC"], src:[["russh.com","Snack-plate trend"]]},
+  {glyph:"🔍", type:"DISCOVERY", v:"high", live:false, h:"One snack-reviewer video can move product overnight", d:"Accounts like @snackolator (~793K), @markie_devo (~221K — posts new releases before brands even announce), and @snachwithzach (~547K TikTok) are the discovery engine for new snacks; a single feature can sell out a small brand, and they regularly cover free 'new snack' sends.", play:"Seed the top snack-review accounts with a branded 'Crunch Party' box tied to a flavor drop. The cheapest path to 'our puffs went viral.' See Brand Ambassadors.", terr:"REACH", drove:"XP-0715-3", pillars:["XP"], src:[["instagram.com","@snackolator"]]},
+  {glyph:"💬", type:"COMMUNITY", v:"medium", live:false, h:"The comment section is a free content brief", d:"Duolingo and Dude Wipes built followings by treating comments as the brief — replying in character and turning a comment into the next video. Zero-cost, compounding, and it builds the parasocial bond that makes a small account feel like a scene worth joining.", play:"Reply to comments AS the mascots, and turn the best comment each week into a video. Free content — and it's how a 5K account starts to feel like a party people want in on.", terr:"FUN", drove:"CP-0715-5", pillars:["CP"], src:[["contentgrip.com","Duolingo strategy"]]},
+];
+const COMPETITORS = [
+  {name:"LesserEvil", dir:"hot", note:"The category’s biggest BFY-snack following (~132K IG) — and the clearest proof of the opening: their mascots live ON THE BAG, not in the feed. Great product (paleo/avocado-oil puffs), safe product-shot social. Hershey closed its ~$750M acquisition of them in November 2025 — leaving you as the still-independent option.", lesson:"The category leader keeps its personality on the packaging. Put yours in the feed and you can close the gap on content, not budget.", src:[["foodbusinessnews.net","Hershey–LesserEvil close · Nov 2025"],["lesserevil.com","LesserEvil"]]},
+  {name:"Nutter Butter", dir:"hot", note:"The gold-standard small-budget analog: went ~3K → 700K followers on a weird, lo-fi ‘universe’ seeded from fan comments — strictly organic, low creative spend, ~a year of quiet iteration before it broke.", lesson:"A plain cookie built a cult on personality + patience. Your ‘Crunch Party’ world is the universe they had to invent from scratch.", src:[["marketingbrew.com","Nutter Butter"]]},
+  {name:"Poppi", dir:"hot", note:"BFY soda that scaled on founder-native TikTok ($100K in 24h from one un-produced founder post), a micro→mega creator ladder, and fridge-restock / GRWM formats — then sold to PepsiCo for ~$2B.", lesson:"Founder personality + creator seeding is the growth engine. Syd is your Poppi founder — un-produced and real.", src:[["soarwithus.co","Poppi"]]},
+  {name:"Dude Wipes / Fishwife", dir:"flat", note:"Voice-led, budget-free breakouts: Dude Wipes made the comment section the content (reply-guy); Fishwife ‘talks like your best friend.’ Neither leads with product shots — both lead with a distinct voice.", lesson:"Personality and a clear voice beat polish. Pick a voice (yours = the disco host) and commit to it.", src:[["marketingbrew.com","Fishwife voice"]]},
+  {name:"Hippeas", dir:"flat", note:"~102K IG chickpea-puff brand with a fun identity but a fairly standard product-shot / lifestyle feed — reach came more from distribution + budget than from content.", lesson:"Even the funded players leave the content lane wide open. Distribution buys shelf; personality buys demand.", src:[["instagram.com","Hippeas"]]},
+  {name:"Cosmos / Snacklins", dir:"cool", note:"Cautionary tales: Cosmos Creations (~1.4K IG) and Snacklins (~379 on TikTok, despite ~$13M revenue) run near-invisible product-shot feeds. Revenue without a content engine caps the ceiling.", lesson:"Good product + no voice = a small, quiet following. Don’t be the brand with a great snack nobody’s talking about.", src:[["instagram.com","Snacklins"]]},
+];
+
+const AMBASSADORS = [
+  {handle:"@snackolator", name:"Snack-review · ~793K", tier:"early bet", star:true, focus:"Daily new-snack discovery", why:"The single biggest ‘new snack’ discovery account — one feature can sell out a small brand. Seed a Crunch Party box tied to a flavor drop. Start here.", deals:"Yes — features free sends"},
+  {handle:"@markie_devo", name:"Mark Vayntraub · ~221K", tier:"early bet", focus:"Snack ‘breaking news’", why:"Posts new releases before brands even announce them — getting on his radar = free pre-launch buzz.", deals:"Yes"},
+  {handle:"@eatglutenfreewithme", name:"Lauren Murawski · ~85K", tier:"early bet", focus:"GF / celiac lifestyle", why:"A deeply trusted celiac voice. GF is your hero claim, and this audience buys on trust and evangelizes safe brands hard.", deals:"Yes"},
+  {handle:"@snachwithzach", name:"Snack with Zach · ~547K", tier:"early bet", focus:"New-snack reviews (TikTok)", why:"A strong TikTok discovery engine — ideal for a flavor-drop moment.", deals:"Yes"},
+  {handle:"@kalejunkie", name:"Nicole Modic · large", tier:"early bet", focus:"Better-for-you snacking + recipes", why:"Her audience is your exact clean-label buyer — great for the avocado-oil / snack-plate content.", deals:"Yes"},
+  {handle:"@sdfoodies", name:"Chris & Ashley · ~400K", tier:"reach", focus:"San Diego food (hometown)", why:"The dominant SD food platform — the perfect hometown megaphone + a local-retail and woman-owned-brand story.", deals:"Yes"},
+  {handle:"@sulheejessica", name:"Jessica Woo · very large", tier:"reach", focus:"Viral lunchbox / bento", why:"The back-to-school lunchbox engine; puffs slot into playful kid presentations. Highest-LTV mom audience.", deals:"Yes"},
+  {handle:"@myglutenfreeguide", name:"Laura Strange · ~296K", tier:"reach", focus:"GF lifestyle guide", why:"A large GF audience — safe-brand discovery + trust at scale.", deals:"Yes"},
+  {handle:"@seedoilfreecertified", name:"Seed Oil Free Alliance · org", tier:"reach", focus:"Clean-label certification", why:"Not a creator — the certification body. Earn the seal + tag them: the credibility play with the exact clean-label buyer.", deals:"Certification, not a paid post"},
+];
+
+const BRIEFS = [
+  {id:"CP-0715-1", pillar:"CP", dna:"mascot-bit", plat:"IG + TikTok", anchor:true, world:true, panelTags:["fun","mascot","trend"], concept:"Meet the cast: introduce Avo, Sorghum & Rice as the hosts of the Crunch Party.", hooks:["meet the Crunch Party hosts (they have OPINIONS)","POV: the ingredients on your snack can finally talk","introducing the only snack cast with a bouncer, a comeback kid, and a golden retriever"], rec:0, caption:"welcome to the Crunch Party 🎉 meet your hosts: Avo (thinks he runs the place), Sorghum (the comeback nobody saw coming), and Rice (keeping us all in line). a party in every crunch — Xx Syd", audioIG:"Y2K / disco trending audio", audioTT:"Trending audio via Commercial Music Library", visual:"Prop or 2D-cutout mascots introduced one by one in a disco-lit setting; big Y2K text cards. Rough + fun beats polished.", scenes:[{t:"0–3s",dofilm:"Disco-lit set, a little velvet rope. Avo struts in behind it, sunglasses on, owning the frame.",txt:"meet your Crunch Party hosts"},{t:"3–6s",dofilm:"Hard cut to Sorghum stepping into a spotlight with a confident wink to camera.",txt:"Sorghum — the comeback nobody saw coming"},{t:"6–9s",dofilm:"Rice waves shyly holding napkins; all three land in one group frame + big Y2K title card.",txt:"a party in every crunch 🎉"}], ladder:true, drove:["Y2K nostalgia peaking","category has no voice","owned characters beat celebrities"], why:"The single highest-leverage move: put the cast in motion. It’s the one asset no competitor has, and the ensemble gives you content forever."},
+  {id:"CP-0715-2", pillar:"CP", dna:"trend-jack", plat:"TikTok + IG", anchor:true, world:true, panelTags:["fun","mascot","trend"], concept:"‘Summon the Crunch Party’ — the Food Jutsu trend with a mascot / bag reveal on the beat.", hooks:["summoning the Crunch Party like…","do the sign → drop the beat → snack appears","when you need a party in every crunch RIGHT now"], rec:1, caption:"summoning the Crunch Party ⚡ (before this trend cools, obviously). who’s coming? 🥑🌾🍚", audioTT:"Food Jutsu trend sound (via Commercial Music Library)", audioIG:"Original audio", visual:"Hand-sign → hard cut on the beat → mascots or a bowl of puffs ‘appear.’ Zero production; one clean cut. Move fast — trend is peaking.", scenes:[{t:"0–2s",dofilm:"You (or just a hand) face camera and start the anime hand-sign build-up, tension rising.",txt:"summoning the Crunch Party like…"},{t:"2–3s",dofilm:"Hard cut ON the beat — quick screen flash, no dialogue.",txt:""},{t:"3–6s",dofilm:"A bowl of puffs (or the mascots) 'appears' in a burst of sparkles where your hands were.",txt:"who's coming? 🥑🌾🍚"}], ladder:false, drove:["Food Jutsu is June’s #1 trend (36M+ posts)","owned characters"], why:"A free, high-completion trend that’s tailor-made for a mascot brand — and it’s live right now, so it’s the fastest personality win on the board."},
+  {id:"CP-0715-3", pillar:"CP", dna:"mascot-bit", plat:"IG + TikTok", anchor:false, world:true, panelTags:["fun","mascot","clean"], concept:"Avo works the velvet rope: which snacks are VIP enough for the Crunch Party (seed-oil snacks get bounced).", hooks:["Avo deciding who gets past the velvet rope","the snack aisle bouncer has STANDARDS","seed oils? not on the list."], rec:0, caption:"only the best get past the velvet rope 🥑✨ (sorry, not sorry, seed-oil snacks) made with avocado oil, never the icky stuff.", audioIG:"Confident / bougie trending audio", audioTT:"Trending audio via Commercial Music Library", visual:"Avo as the bouncer at a tiny velvet rope; snacks ‘audition’ to get in. Playful, never mean about competitors by name.", scenes:[{t:"0–3s",dofilm:"Avo at a tiny velvet rope with a clipboard, playing bouncer. Establish the bit fast.",txt:"the snack aisle has a bouncer now"},{t:"3–6s",dofilm:"A clean snack 'auditions' and gets waved in with an approving nod.",txt:"avocado oil? right this way ✨"},{t:"6–9s",dofilm:"A mystery 'seed-oil snack' (label hidden) gets a polite hand — not tonight.",txt:"seed oils? not on the list."}], ladder:true, drove:["avocado-oil clean-label wave","owned characters"], why:"Turns the clean-label flex into a bit — the ingredient story told as personality, not a lecture. Anchored to a real product truth (avocado oil)."},
+  {id:"CP-0715-4", pillar:"CP", dna:"mascot-bit", plat:"IG + TikTok", anchor:false, world:true, panelTags:["fun","mascot"], concept:"Sorghum’s comeback monologue: ‘never heard of me? oh, you will’ (own the ancient-grain story).", hooks:["the most confident grain you’ve never heard of","sorghum’s villain-origin… er, hero-origin story","move over corn"], rec:0, caption:"10,000 years old and JUST getting started 🌾 never heard of sorghum? oh, you will. (US-grown, gluten-free, and frankly iconic.)", audioIG:"Dramatic / comeback trending audio", audioTT:"Trending audio via Commercial Music Library", visual:"Sorghum in a spotlight giving a motivational monologue; captions carry the heritage facts. Ecstatic, not dark.", scenes:[{t:"0–3s",dofilm:"Sorghum steps into a single spotlight, dramatic, mid-motivational-monologue.",txt:"never heard of me? oh, you will."},{t:"3–5s",dofilm:"Hard cut on 'move over corn' — quick punch-in zoom for emphasis.",txt:"move over, corn 🌽➡️🌾"},{t:"5–8s",dofilm:"Sorghum lands the confident comeback pose; a heritage-fact card pops in.",txt:"10,000 yrs old · gluten-free · iconic"}], ladder:true, drove:["nobody owns the sorghum story","owned characters"], why:"Claims an open category lane (the ancient-grain story) as a recurring character bit — educational and funny at once, and a content moat."},
+  {id:"CP-0715-5", pillar:"CP", dna:"reply-guy", plat:"TikTok + IG", anchor:false, world:true, panelTags:["fun","mascot","trend"], concept:"Reply to a comment AS the mascots — turn this week’s funniest comment into a bit.", hooks:["replying to your comments but it’s the mascots","you asked, Avo answered (rudely, lovingly)","the comment section runs this account now"], rec:0, caption:"y’all in the comments are the real content 😂 tag us and the cast might just reply. what should we make next?", audioTT:"Trending audio via Commercial Music Library", audioIG:"Original audio", visual:"Screenshot a real comment; the cast ‘responds.’ Cheap, native, compounding — the Duolingo mechanic.", scenes:[{t:"0–2s",dofilm:"A real fan comment, screenshotted big on a disco-pink background. Slow push-in.",txt:"you asked — the cast is answering"},{t:"2–5s",dofilm:"Cut to Avo 'reacting' to the comment: dramatic, offended-then-charmed.",txt:"Avo has THOUGHTS"},{t:"5–8s",dofilm:"The cast delivers the verdict; end on the ask.",txt:"the comments run this account now 😂"}], ladder:false, drove:["comment-section-as-brief (Duolingo/Dude Wipes)"], why:"The cheapest, most compounding format there is — turns the audience into your writers’ room and makes a 5K account feel like a scene people want in on."},
+
+  {id:"ST-0715-1", pillar:"ST", dna:"syd-host", plat:"IG + TikTok", anchor:true, world:true, panelTags:["inclusion","gf","trust"], concept:"Syd’s origin: ‘MOM, PLEASE’ — the gluten-free kid who felt left out, and the snack she built.", hooks:["‘MOM, PLEASE’ — the story behind the whole brand","gluten-free since 7, and tired of the boring snack table","why a farm girl started a snack company"], rec:0, caption:"little Syd just wanted the fun snacks everyone else had — but they were all seed oils and fake colors, a hard no from my (very smart) mom. so grown-up Syd built the one I always wished for. everyone deserves a seat at the snack table 💜 Xx Syd", audioIG:"Warm / nostalgic trending audio", audioTT:"Original audio (Syd to camera)", visual:"Syd to camera, warm and real — the origin, un-produced. This is the emotional core; let it breathe.", scenes:[{t:"0–3s",dofilm:"Syd to camera, warm, natural light, zero production. Just her, telling it.",txt:"I've been gluten-free since I was 7"},{t:"3–8s",dofilm:"Hold on Syd for the 'MOM, PLEASE' memory — let it breathe, no cuts.",txt:"snack time was never really for me"},{t:"8–12s",dofilm:"Syd reveals the bag — 'so I built it myself.' Soft smile to close.",txt:"everyone deserves a seat at the snack table 💜"}], ladder:true, drove:["celiac/GF community buys on trust","inclusion is the unifying territory","independent + founder-led is a moat"], why:"The most authentic, most unifying thing the brand owns. Syd’s celiac story is the flag every audience segment rallies to — and it’s apolitical + safe."},
+  {id:"ST-0715-2", pillar:"ST", dna:"seat-at-the-table", plat:"IG + TikTok", anchor:false, world:true, panelTags:["inclusion","gf","lunchbox"], concept:"‘Everyone deserves a seat at the snack table’ — the GF-kid-included lunchbox moment.", hooks:["the snack my kid can finally bring to the party","for every kid who’s ever felt left out at snack time","packing a lunchbox where nobody’s the odd one out"], rec:1, caption:"no kid should feel left out at snack time 💜 gluten-free, corn-free, no seed oils — and actually fun. a seat at the snack table for everyone.", audioIG:"Warm / heartfelt trending audio", audioTT:"Trending audio via Commercial Music Library", visual:"A lunchbox / snack-table moment; the GF kid included, not singled out. Warm, not preachy.", scenes:[{t:"0–3s",dofilm:"Close on a lunchbox being packed on a kitchen counter, morning light.",txt:"packing a lunchbox where nobody's left out"},{t:"3–6s",dofilm:"The Chasin' Dreams bag goes in right next to the 'normal' snacks — it belongs.",txt:"gluten-free, corn-free, no seed oils — and fun"},{t:"6–9s",dofilm:"A kid's genuine happy reaction to finding it. Warm, not staged-perfect.",txt:"a seat at the snack table for everyone 💜"}], ladder:true, drove:["inclusion unifies every segment","highest-LTV mom audience","back-to-school lunchbox window"], why:"Turns the mission into a feeling parents share — the highest-ceiling, safest territory, and perfectly timed to the back-to-school lunchbox window."},
+  {id:"ST-0715-3", pillar:"ST", dna:"syd-host", plat:"TikTok + IG", anchor:false, world:true, panelTags:["inclusion","trust","fun"], concept:"Founder-POV: packing a ‘World Cup Crunch Party’ seed box with Syd (day-in-the-life).", hooks:["come pack orders with me before the World Cup Final","day in the life of a woman-owned snack founder","what actually goes into a ‘viral’ seeding box"], rec:0, caption:"packing Crunch Party boxes for the big game ⚽ come hang. woman-owned, still independent, still doing this from the ground up 💜 Xx Syd", audioTT:"Trending audio via Commercial Music Library", audioIG:"Original audio", visual:"Un-produced founder-POV, Poppi-style — Syd packing boxes, chatting to camera. Real over polished.", scenes:[{t:"0–3s",dofilm:"Syd to camera at the packing table, boxes + product around her. 'Come hang.'",txt:"come pack World Cup boxes with me"},{t:"3–7s",dofilm:"Hands packing the box, adding a handwritten note — cozy POV.",txt:"woman-owned, still independent"},{t:"7–10s",dofilm:"Seal it with a Crunch Party sticker; hold it up to camera.",txt:"off to the Final ⚽ Xx Syd"}], ladder:true, drove:["founder-POV is the cheapest reach lever (Poppi)","independent + founder-led moat"], why:"Founder-native content is the proven small-brand growth lever, and it’s already Syd’s most engaging lane — this just makes it a repeatable weekly staple."},
+
+  {id:"CC-0715-1", pillar:"CC", dna:"crunch-asmr", plat:"TikTok + IG", anchor:false, world:true, panelTags:["fun","clean"], concept:"Crunch ASMR: the slow pour + one clean crunch (Dill Pickle).", hooks:["turn your sound ON for this one","the most satisfying 8 seconds on your feed","a party in every crunch — literally"], rec:2, caption:"sound ON 🔊 a party in every crunch, and we mean it. (dill pickle hits different.)", audioTT:"Natural ASMR sound (no music — or Commercial Music Library bed)", audioIG:"Natural ASMR sound", visual:"Extreme close-up, good mic: a slow pour into a bowl, one clean crunch. Cheapest high-performing format there is.", scenes:[{t:"0–2s",dofilm:"Extreme close-up on an empty disco-lit bowl; good mic ready. 'Sound on.'",txt:"turn your sound ON 🔊"},{t:"2–5s",dofilm:"Slow pour of Dill Pickle puffs into the bowl — natural sound only, no music.",txt:""},{t:"5–8s",dofilm:"One clean, crisp crunch in close-up, then a hand reaching back for more.",txt:"a party in every crunch — literally"}], ladder:false, drove:["ASMR crunch is a durable format","the puff IS a crunch product"], why:"The category-native format — you literally sell a crunch. Near-zero cost, reliably high-performing, and it makes the product the star without a shelf shot."},
+  {id:"CC-0715-2", pillar:"CC", dna:"ingredient-flex", plat:"IG + TikTok", anchor:false, world:true, panelTags:["clean","avocado","label"], concept:"Read the back of the bag: 6 ingredients, avocado oil never seed oils — Avo reacts proudly.", hooks:["let’s actually read the back of the bag","6 ingredients. that’s the whole flex.","when the ingredient list is the marketing"], rec:0, caption:"read the back of the bag, we’ll wait 🏷️ made with avocado oil, never seed oils — and nothing you can’t pronounce. that’s the whole thing.", audioIG:"Chill / confident trending audio", audioTT:"Trending audio via Commercial Music Library", visual:"Flip the bag, read the list; Avo reacts proudly. Positive + confident, NEVER a seed-oil-science lecture.", scenes:[{t:"0–3s",dofilm:"Hands flip the bag to the ingredient panel; camera reads it with you.",txt:"let's actually read the back of the bag"},{t:"3–6s",dofilm:"Finger lands on 'avocado oil'; cut to Avo giving a proud little nod.",txt:"avocado oil, never seed oils"},{t:"6–8s",dofilm:"Pull to the full 6-ingredient list. 'That's it. That's the list.'",txt:"6 ingredients. that's the whole flex."}], ladder:true, drove:["short labels + fiber are the winning claims","clean-label wave (ride as pride)"], why:"Makes the clean label the content — stated as confidence, not caution. It converts the label-reading crowd without ever preaching or going political."},
+  {id:"CC-0715-3", pillar:"CC", dna:"flavor-drop", plat:"IG + TikTok", anchor:false, world:true, panelTags:["fun","clean"], concept:"BIG CRUNCH NEWS: make Dill Pickle the main character (party-announcement hype + a pickle cameo).", hooks:["BIG CRUNCH NEWS 🥒","the dill pickle puff you didn’t know you needed","pickle people, this one’s for you"], rec:0, caption:"BIG CRUNCH NEWS 🥒✨ dill pickle is the main character now, we don’t make the rules. tag a pickle person.", audioIG:"Hype / announcement trending audio", audioTT:"Trending audio via Commercial Music Library", visual:"Party-announcement energy; a sunglasses dill-pickle cameo. Loud, fun, shareable.", scenes:[{t:"0–2s",dofilm:"Loud 'BIG CRUNCH NEWS' title card, confetti, party-announcement energy.",txt:"BIG CRUNCH NEWS 🥒"},{t:"2–5s",dofilm:"A sunglasses dill-pickle cameo struts in like the main character.",txt:"dill pickle is the main character now"},{t:"5–8s",dofilm:"Bag reveal + confetti burst; end on the tag-a-friend ask.",txt:"tag a pickle person 🫵"}], ladder:true, drove:["dill pickle is a main-character flavor in 2026","owned characters"], why:"Your most social-native SKU deserves hero treatment — a flavor moment told in the brand’s party voice, with a character to make it meme-able."},
+
+  {id:"XP-0715-1", pillar:"XP", dna:"crunch-asmr", plat:"IG + TikTok", anchor:true, world:true, panelTags:["fun","clean"], concept:"World Cup Final watch-party spread: bowls of puffs, ‘no seed oils at THIS party,’ mascots hosting (Sat Jul 19).", hooks:["your World Cup Final snack table, sorted","the only watch party with no seed oils","hosting the Final? the Crunch Party’s already here"], rec:0, caption:"it’s a Crunch Party for the Final ⚽🎉 bowls out, no seed oils in sight. who are you rooting for? (right answer: crunch.)", audioIG:"Big-game / hype trending audio", audioTT:"Trending audio via Commercial Music Library", visual:"A real watch-party spread — bowls of every flavor, disco-party styling, mascots ‘hosting.’ Shoot + post before Saturday.", scenes:[{t:"0–3s",dofilm:"Reveal a full watch-party spread — bowls of every flavor, disco styling.",txt:"your World Cup Final snack table, sorted"},{t:"3–6s",dofilm:"A hand grabs a fistful of puffs; mascots 'host' in the background.",txt:"no seed oils at THIS party"},{t:"6–9s",dofilm:"Wide of the spread with the rooting-interest ask on a text card.",txt:"kickoff Sat 3pm ET ⚽ who's winning?"}], ladder:true, drove:["World Cup Final Jul 19 is the summer’s #1 snack day","savory snack-plate content is live"], why:"The biggest live snacking moment of the summer, and it’s 4 days out — a shareable, on-brand watch-party spread that rides real cultural attention. Rush it."},
+  {id:"XP-0715-2", pillar:"XP", dna:"trend-jack", plat:"TikTok + IG", anchor:false, world:true, panelTags:["fun","trend"], concept:"Crash a trend: jump on a current sound with a mascot / Syd twist (comment-brief).", hooks:["crashing this trend, Crunch Party style","every trend is better with a bouncer avocado","we saw the trend and we simply had to"], rec:0, caption:"crashing the trend uninvited, as usual 🕺 which one should the cast do next? ↓", audioTT:"Whatever sound is trending that day (Commercial Music Library)", audioIG:"Trending audio", visual:"Move at the speed of culture — grab a live sound within a day, add the mascot / Syd twist. Speed > polish.", scenes:[{t:"0–2s",dofilm:"Open in whatever trending format/sound is hot that day — set it up straight.",txt:"crashing this trend, Crunch Party style"},{t:"2–5s",dofilm:"Drop the mascot / Syd twist that makes it unmistakably yours.",txt:"every trend's better with a bouncer avocado"},{t:"5–8s",dofilm:"Land the punchline; end on the ask to farm comments.",txt:"which trend should the cast crash next? ↓"}], ladder:false, drove:["move at the speed of culture (e.l.f.)","comment-section-as-brief"], why:"A standing ‘ride whatever’s hot this week’ slot keeps the account current and fed — the low-effort reach that a personality brand needs to stay in the conversation."},
+  {id:"XP-0715-3", pillar:"XP", dna:"creator-ugc", plat:"IG + TikTok", anchor:false, world:true, panelTags:["fun","trust"], concept:"Seed the snack-reviewers: send @snackolator & co a ‘Crunch Party box’ for a flavor drop.", hooks:["we sent the biggest snack accounts a Crunch Party box","when the snack reviewers get the box…","seeding, but make it a party"], rec:0, caption:"sending the Crunch Party to the people who review EVERYTHING 🤝 let’s see what they think — tag a snack account we should send next.", audioIG:"Fun / unboxing trending audio", audioTT:"Trending audio via Commercial Music Library", visual:"Build + send a branded ‘Crunch Party’ box (the Graza playbook); repost the reviewers’ reactions as UGC. Open a TikTok Shop first.", scenes:[{t:"0–3s",dofilm:"Pack a branded 'Crunch Party' box on camera — product, sticker, a note.",txt:"sending the biggest snack accounts a box"},{t:"3–6s",dofilm:"Cut to a reviewer's genuine reaction (reposted UGC) tasting a flavor.",txt:"when the snack reviewers get the box…"},{t:"6–9s",dofilm:"End card with 'where to get it' → TikTok Shop link/sticker.",txt:"get yours → TikTok Shop 🛒"}], ladder:true, drove:["snack-reviewers move product overnight","seed-first is cheap + works (Graza/Poppi/LesserEvil)"], why:"The single cheapest path to ‘our puffs went viral’ — seed the discovery accounts, open a TikTok Shop so it converts, and turn the best reactions into paid whitelisted ads."},
+];
+
+const CONVICTION = {
+  "CP-0715-1":{voice:90,panel:88,pulse:82,rec:6}, "CP-0715-2":{voice:88,panel:84,pulse:92,rec:9},
+  "CP-0715-3":{voice:86,panel:82,pulse:78,rec:4}, "CP-0715-4":{voice:84,panel:80,pulse:74,rec:3},
+  "CP-0715-5":{voice:82,panel:80,pulse:80,rec:5}, "ST-0715-1":{voice:88,panel:90,pulse:76,rec:5},
+  "ST-0715-2":{voice:84,panel:86,pulse:72,rec:4}, "ST-0715-3":{voice:82,panel:82,pulse:78,rec:6},
+  "CC-0715-1":{voice:84,panel:80,pulse:84,rec:6}, "CC-0715-2":{voice:86,panel:84,pulse:74,rec:4},
+  "CC-0715-3":{voice:84,panel:82,pulse:80,rec:7}, "XP-0715-1":{voice:88,panel:86,pulse:94,rec:10},
+  "XP-0715-2":{voice:78,panel:78,pulse:80,rec:5}, "XP-0715-3":{voice:80,panel:84,pulse:78,rec:6},
+};
+function getConv(id){const c=CONVICTION[id];if(!c)return null;const base=Math.round((c.voice+c.panel+c.pulse)/3);const score=Math.min(99,base+c.rec);const band=score>=85?"HIGH":score>=70?"MEDIUM":"WATCH";return{...c,base,score,band};}
+
+const DECISIONS = [
+  {verb:"PROMOTED",cls:"d-prom",t:"Activate the mascot cast (Avo · Sorghum · Rice)",d:"Your biggest untapped asset. Promoted to a recurring ensemble with one personality each — the M&M’s model = content forever, and nobody else in the category has it."},
+  {verb:"QUEUED",cls:"d-queue",t:"World Cup Final watch-party content",d:"Queued for Sat Jul 19 — the summer’s #1 snack day. A ‘Crunch Party for the Final’ spread. Produce this week; the window closes Saturday."},
+  {verb:"KILLED",cls:"d-kill",t:"Bare ‘spotted on the shelf’ retail-proof posts",d:"The content getting ~9 likes. Killed as a default — that’s buyer/investor proof, not consumer demand. Every retail moment gets reframed with personality (cap ≤ 2/week)."},
+  {verb:"ESCALATED",cls:"d-esc",t:"Seed the snack-reviewers + open a TikTok Shop",d:"Before the next flavor drop: send @snackolator & co a Crunch Party box and open a TikTok Shop so it converts. The cheapest path to ‘went viral.’"},
+  {verb:"PROMOTED",cls:"d-prom",t:"‘Read the back of the bag’ as a recurring format",d:"Promoted as a weekly clean-label staple — 6 ingredients, avocado oil, stated with pride. Positive + confident, never a seed-oil-science lecture."},
+];
+
+const ANTI_PATTERNS = [
+  "Leave the mascots on the bag — the whole point is to put the Cast in motion.",
+  "Default to retail-proof shelf shots — buyer/investor content, not consumer demand. Reframe every retail moment with personality; cap at ≤2/week.",
+  "Argue seed-oil science, health-scare, or preach — say ‘avocado oil, never seed oils’ once, proudly, as identity. No lectures.",
+  "Go political / MAHA / partisan — never. The fun register is the guardrail.",
+  "Dark ‘mascot torture’ / grotesque / unhinged-for-no-reason — keep it ecstatic disco + warm. The party never turns into a horror movie.",
+  "Attitude with no product truth behind it — anchor every flex to real ingredients + real crunch, or it’s hollow.",
+  "Over-produce it into an ad — rough beats polished; TikTok can smell corporate.",
+  "Chase a trend the Crunch Party wouldn’t naturally attend (the natural-fit bar).",
+  "Ship a brief a 3-person team can’t actually shoot this week — bandwidth is real.",
+  "Off-model mascots — lock a model sheet per character so they stay recognizable.",
+  "Use trending audio on the brand TikTok without the Commercial Music Library — it gets muted.",
+];
+
+const ENGINE_STEPS = [
+  {agent:"Signal Scout",icon:"📡",title:"Signal spotted",focus:"reads your feed + the culture",watches:["your IG/TikTok analytics","trending sounds + formats","the snack + clean-label category"],what:"Sees the Crunch Party world getting ~9–25 likes on shelf shots — while a Y2K/disco trend is peaking on TikTok.",filters:["Is this reach or noise?","Would the Crunch Party naturally show up here?"],verdict:"Y2K disco is trending — and it’s literally your world. Rideable now.",incoming:null},
+  {agent:"Cast Director",icon:"🥑",title:"Handed to a mascot",focus:"assigns it to a character",watches:["the cast personality bibles","the group dynamic"],what:"Hands the disco trend to Avo (the bougie bouncer) — his velvet-rope bit fits the aesthetic perfectly.",filters:["Which character owns this?","Is it on-model?"],verdict:"Avo hosts. On-brand character locked.",incoming:"Signal Scout"},
+  {agent:"Voice Keeper",icon:"🎉",title:"Scored on voice",focus:"checks brand fit + tone",watches:["voice exemplars","ecstatic-not-dark rule"],what:"Rewrites it in the warm disco-party register; keeps it celebratory, never grotesque; no politics, no lectures.",filters:["Fun, warm, on-voice?","Ecstatic disco, not dark?"],verdict:"On voice. ‘Only the best get past the velvet rope.’",incoming:"Cast Director"},
+  {agent:"Truth Check",icon:"🏷️",title:"Anchored to a truth",focus:"is the attitude earned?",watches:["the product truths","real ingredients + real crunch"],what:"Confirms the confidence is earned — real avocado oil, real crunch — so the flex lands instead of ringing hollow.",filters:["Is the attitude backed by a fact?","Any claim risk?"],verdict:"Anchored. The flex is true.",incoming:"Voice Keeper"},
+  {agent:"Snack Panel",icon:"✨",title:"Pre-tested on snackers",focus:"4 named personas react",watches:["Chloe · Kayla · Sage · Mara","save / share likelihood"],what:"Runs it past the celiac, clean-label, snack-girlie, and lunchbox-mom personas — the same panel that scores every brief.",filters:["Would they share it?","Fun without alienating anyone?"],verdict:"High share intent from Sage + Chloe.",incoming:"Truth Check"},
+  {agent:"Party Referee",icon:"🎊",title:"Party-rule check",focus:"is the world in the feed?",watches:["the Party Rule (≥3 mascot + ≥1 Syd)","retail-proof cap"],what:"Confirms the week brings the world into the feed — enough mascot bits + a Syd moment, retail-proof held to ≤2.",filters:["Is the party in the feed?","Retail-proof under control?"],verdict:"Party’s in the feed. 5 world-forward briefs, ≤2 shelf.",incoming:"Snack Panel"},
+  {agent:"Brief Builder",icon:"📝",title:"Brief delivered",focus:"assembles the shoot-ready brief",watches:["shot-by-shot storyboard","the words to post","audio (Commercial Music Library flagged)"],what:"Ships the full brief — a shot list with on-screen text, the hooks + caption, an audio note, the character + the truth.",filters:["Shoot-able by a 3-person team this week?","Rough > polished?"],verdict:"Delivered. Your team shoots + posts.",incoming:"Party Referee"},
+];
+
+/* ---------- helpers ---------- */
+function fmt(n){return n>=1000000?(n/1000000).toFixed(1)+"M":n>=1000?Math.round(n/1000)+"K":""+n;}
+function SrcChips({src}){return(<div className="srcchips">{(src||[]).map((s,i)=>(<a key={i} className="src" href={"https://"+s[0]} target="_blank" rel="noopener" title={s[1]}>{s[0]}</a>))}</div>);}
+function Btn({children,onClick,style}){return<button className="btn-chunky" style={style} onClick={onClick}>{children}</button>;}
+
+/* ---------- components ---------- */
+class ErrorBoundary extends React.Component{
+  constructor(p){super(p);this.state={err:false};}
+  static getDerivedStateFromError(){return{err:true};}
+  render(){if(this.state.err)return(<div style={{padding:40,fontFamily:'Nunito'}}><h2>The engine hit a snag.</h2><p>Refresh to reload the Chasin' Dreams engine.</p></div>);return this.props.children;}
+}
+
+function PerfChart(){
+  const bar=(rows,color)=>rows.map(([lbl,val],i)=>(
+    <div className="bar-row" key={i}>
+      <div className="bar-label">{lbl}</div>
+      <div className="bar-track"><div className="bar-fill" style={{width:Math.max(0.4,(val/PERF_MAX)*100)+"%",background:color}}></div></div>
+      <div className="bar-val" style={{color}}>{fmt(val)}</div>
+    </div>
+  ));
+  return (
+    <div className="perf-card">
+      <h3>The Personality Gap</h3>
+      <div className="sub">Followings in food don’t track budget or product quality — they track whether there’s a personality in the feed.</div>
+      <div className="perf-legend"><span><span className="sw" style={{background:"var(--brand)"}}></span>Put a personality in the feed</span><span><span className="sw" style={{background:"var(--ink-soft)"}}></span>Kept it on the bag</span></div>
+      <div style={{marginTop:14}}>
+        {bar(PERF_PERSONALITY,"var(--brand)")}
+        <div style={{height:8}}></div>
+        {bar(PERF_ONBAG,"var(--ink-soft)")}
+      </div>
+      <div className="perf-punch"><b>Read it:</b> Nutter Butter is a plain cookie. Scrub Daddy is a sponge. Duolingo is a language app. All three tower over brands with better products — because they put a character in the feed. In food, following tracks personality, not budget or product. You already have a better story than any of them. <b>It’s just still on the bag.</b></div>
+    </div>
+  );
+}
+
+function MondayMemo({onClose,onGo}){
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="modal" onClick={e=>e.stopPropagation()}>
+        <div className="modal-hero">
+          <button className="x" onClick={onClose}>×</button>
+          <div style={{fontFamily:'JetBrains Mono',fontSize:11,letterSpacing:'.1em',opacity:.85}}>{WEEK}</div>
+          <h1 style={{fontSize:27,margin:'6px 0 2px',fontWeight:900}}>The Monday Memo</h1>
+          <div style={{fontFamily:'Fraunces',fontStyle:'italic',fontSize:14,opacity:.92}}>your week at a glance — a first read to react to, not a finished plan</div>
+        </div>
+        <div className="modal-body">
+          <div className="m-sec">
+            <div className="m-sec-label">📖 The Read</div>
+            <div style={{background:'var(--paper)',border:'1px solid var(--border)',borderLeft:'4px solid var(--brand)',borderRadius:12,padding:'16px 18px',fontFamily:'Fraunces',fontSize:16,lineHeight:1.55,fontStyle:'italic'}}>
+              "Three things are live this week and they line up almost too well: the World Cup Final on Saturday (the summer's biggest snack day), the Food Jutsu trend at its peak, and Cheetos proving dill pickle is a hit — a flavor you already make. This is a week to move fast on all three while they're hot. The three moves below are the ones to shoot now."
+            </div>
+          </div>
+          <div className="m-sec"><div className="m-sec-label">📡 3 Signals This Week</div>
+            {WELCOME_HIGHLIGHTS.map((s,i)=>(<div key={i} style={{display:'flex',gap:12,padding:'11px 0',borderBottom:i<WELCOME_HIGHLIGHTS.length-1?'1px dashed var(--border)':'none'}}><div style={{fontFamily:'Baloo 2',fontWeight:900,color:'var(--brand)',fontSize:17,minWidth:18}}>{i+1}</div><div><div style={{fontWeight:800,fontSize:13.5,marginBottom:2}}>{s.t}</div><div style={{fontSize:12.5,color:'var(--ink-soft)',lineHeight:1.45}}>{s.d}</div></div></div>))}
+          </div>
+          <div className="m-sec"><div className="m-sec-label">🎯 Shoot These This Week</div>
+            {WELCOME_MOVES.map((m,i)=>(<div key={i} style={{background:'var(--paper)',border:'1px solid var(--border)',borderRadius:12,padding:'12px 14px',marginBottom:8}}><div style={{fontWeight:800,fontSize:13.5,marginBottom:3}}>→ {m.t}</div><div style={{fontSize:12.5,color:'var(--ink-soft)',lineHeight:1.45}}>{m.d}</div></div>))}
+          </div>
+          <Btn style={{width:'100%',padding:14,fontSize:15}} onClick={onGo}>SEE THIS WEEK'S ENGINE →</Btn>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function IntelBrief({onDrop,onOpen}){
+  const [tab,setTab]=useState("pulse");
+  const tabs=[["pulse","Cultural Pulse",PULSE.length],["trends","Category + Research",TRENDS.length],["comps","Competitor Watch",COMPETITORS.length],["amb","Brand Ambassadors",AMBASSADORS.length],["panel","Snack Panel",PANEL.length]];
+  const briefById=id=>BRIEFS.find(b=>b.id===id);
+  const Pips=({pillars})=>(<div className="pips">{(pillars||[]).map(pk=>(<span className="pip" key={pk} title={"This signal feeds the “"+PILLARS[pk].short+"” content pillar"} style={{background:PILLARS[pk].color+"1c",color:PILLARS[pk].color}}>{PILLARS[pk].glyph} {PILLARS[pk].short}</span>))}</div>);
+  const DroveLink=({id})=>{const b=briefById(id);if(!b)return null;return(<button className="brief-link" title="Open the content brief this signal generated" onClick={()=>onOpen(b)}><span className="bl-arrow">↳ we turned this into a brief:</span><span style={{fontWeight:700,color:"var(--ink)"}}>{b.concept.length>52?b.concept.slice(0,52)+"…":b.concept}</span></button>);};
+  const FreshChip=({live})=>(<span className={"fresh-chip "+(live?"fc-fresh":"fc-comp")} title={live?"A live signal we're tracking this week":"A durable structural tailwind at the brand's back"}>{live?"● LIVE NOW":"◈ TAILWIND"}</span>);
+  return (
+    <div className="wrap">
+      <div className="subtabs">{tabs.map(([k,l,n])=>(<button key={k} className={"subtab"+(tab===k?" on":"")} onClick={()=>setTab(k)}>{l}<span className="badge">{n}</span></button>))}</div>
+
+      {(tab==="pulse"||tab==="trends") && (<div className="read-hint"><span className="rh-ico">👀</span><div><b>New here? How to read a card:</b> each one is a real signal we found (tap the grey <b>source chips</b> to verify it), then <b>▶ The Play</b> is exactly how we'd use it. A <span className="lnow">● LIVE NOW</span> tag means it's moving this week; <span className="ltail">◈ TAILWIND</span> means a durable force at your back. The yellow <b>↳ we turned this into a brief</b> link opens the ready-to-shoot content it generated.</div></div>)}
+
+      {tab==="pulse" && (<>
+        <div className="mom-cols">
+          <div className="mom-col"><h4>🔥 What's popping</h4>{PULSE.filter(p=>p.v==="high").slice(0,3).map((p,i)=>(<div className="mom-item" key={i}><span className="mchip mup">RIDE</span><div><b>{p.h}</b> — {p.play}</div></div>))}</div>
+          <div className="mom-col"><h4>🧊 What's cooling — don't chase</h4>
+            <div className="mom-item"><span className="mchip mdown">SKIP</span><div><b>Bare ‘spotted on the shelf’ shots</b> — that’s buyer/investor proof, not consumer demand. It’s the ~9-like content.</div></div>
+            <div className="mom-item"><span className="mchip mdown">SKIP</span><div><b>Over-produced, polished ads</b> — TikTok can smell corporate. Rough, real, one-take beats studio-lit.</div></div>
+            <div className="mom-item"><span className="mchip mdown">SKIP</span><div><b>Seed-oil fear-mongering / health lectures</b> — off-brand and risky. State ‘avocado oil’ as pride, never a science argument.</div></div>
+            <div className="mom-item"><span className="mchip mdown">SKIP</span><div><b>Anything political / MAHA-coded</b> — the fun disco register is the guardrail. Never go there.</div></div>
+            <div className="mom-item"><span className="mchip mdown">SKIP</span><div><b>Dark ‘mascot torture’ bits</b> — the party stays ecstatic + warm, never grotesque.</div></div>
+          </div>
+        </div>
+        <div className="grid grid-2">{PULSE.map((p,i)=>(
+          <div className="card" key={i}><div className="rail" style={{background:p.v==="high"?"var(--coral)":"var(--accent-deep)"}}></div>
+            <div className="card-head"><div className="glyph" style={{background:'var(--cream-deep)'}}>{p.glyph}</div><div className="eyebrow">{p.type}</div><div className="ch-right"><FreshChip live={p.live}/><span title="How strongly this signal is moving" className={"vbadge "+(p.v==="high"?"vhigh":p.v==="medium"?"vmed":"vlow")}>{p.v.toUpperCase()}</span></div></div>
+            <h3>{p.h}</h3><p className="detail">{p.d}</p>
+            <div className="playbox"><span className="plabel">▶ The Play</span>{p.play}</div>
+            <DroveLink id={p.drove}/>
+            <Pips pillars={p.pillars}/>
+            <div className="cardfoot"><SrcChips src={p.src}/><button className="dropbtn" onClick={()=>onDrop(p.h)}>↓ Send to Studio</button></div>
+          </div>))}
+        </div>
+      </>)}
+
+      {tab==="trends" && (<div className="grid grid-2">{TRENDS.map((t,i)=>(
+        <div className="card" key={i}><div className="rail" style={{background:'var(--brand)'}}></div>
+          <div className="card-head"><div className="glyph" style={{background:'var(--brand-light)'}}>{t.glyph}</div><div className="eyebrow">{t.type}</div><div className="ch-right"><FreshChip live={t.live}/><span title="How strongly this signal is moving" className={"vbadge "+(t.v==="high"?"vhigh":t.v==="medium"?"vmed":"vlow")}>{t.v.toUpperCase()}</span></div></div>
+          <h3>{t.h}</h3><p className="detail">{t.d}</p>
+          <div className="playbox"><span className="plabel">▶ Engine Angle</span>{t.play}</div>
+          <DroveLink id={t.drove}/>
+          <Pips pillars={t.pillars}/>
+          <div className="cardfoot"><SrcChips src={t.src}/><button className="dropbtn" onClick={()=>onDrop(t.h)}>↓ Send to Studio</button></div>
+        </div>))}
+      </div>)}
+
+      {tab==="comps" && (<div className="grid grid-2">{COMPETITORS.map((c,i)=>(
+        <div className="card" key={i}><div className="rail" style={{background:c.dir==="hot"?"var(--coral)":c.dir==="cool"?"var(--green)":"var(--ink-soft)"}}></div>
+          <div className="card-head"><h3 style={{margin:0,fontFamily:'Baloo 2',fontSize:17,fontWeight:800,color:'var(--brand)'}}>{c.name}</h3><span className={"dir-badge "+(c.dir==="hot"?"dir-hot":c.dir==="cool"?"dir-cool":"dir-flat")} style={{marginLeft:'auto'}}>{c.dir==="hot"?"Heating up":c.dir==="cool"?"Cooling":"Flat"}</span></div>
+          <p className="detail">{c.note}</p>
+          <div className="playbox"><span className="plabel">The Lesson</span>{c.lesson}</div>
+          <SrcChips src={c.src}/>
+        </div>))}
+      </div>)}
+
+      {tab==="amb" && (<>
+        <div className="wip-banner"><span className="tag">TARGET ROSTER · WIP</span><p>Real, active creators to seed for the ‘Crunch Crew.’ Ordered by FIT, not size: <b>◆ early-bet</b> (snack-review ‘movers’ + GF micro-creators who convert) first, then <b>◇ reach</b>. The play is seed-first (free product, no contract), then convert your best organic posters to paid + whitelist their clips as ads. Counts are approximate + drift — re-pull before outreach. Targets, not confirmed partners.</p></div>
+        <div className="playbox" style={{marginBottom:16,background:'var(--brand-light)',padding:'14px 16px'}}><span className="plabel">▶ The seeding playbook — copy Graza + Poppi + LesserEvil</span>Seed first, pay later (a gifting program can start under $1K): DM food + GF + mom micro-creators a branded "Crunch Party box," no contract, and let the product do the work (the Graza playbook — sold out week 1). Open a TikTok Shop with an affiliate commission so those videos earn on every bag, then convert your best organic posters into a perks-first "Crunch Crew" ambassador pod (the LesserEvil model) and <b>whitelist their best clips as paid ads</b>. Founder-native content from Syd anchors it all (the Poppi model).</div>
+        <div className="grid grid-3">{AMBASSADORS.map((a,i)=>(
+          <div className="amb-card" key={i}><div className="rail" style={{background:a.tier==="early bet"?"var(--green)":"var(--teal)"}}></div>
+            <div className="amb-top"><div className="amb-av">{a.handle[1].toUpperCase()}</div><div><div className="amb-handle">{a.handle}</div><div className="amb-name">{a.name}</div></div><span className="status-pill" style={{background:a.tier==="early bet"?'#E7F5EC':'var(--brand-light)',color:a.tier==="early bet"?'#2E8B57':'var(--brand)'}}>{a.tier==="early bet"?"◆ early bet":"◇ reach"}</span></div>
+            {a.star&&<div style={{fontSize:9.5,fontWeight:800,color:'var(--accent-deep)',fontFamily:'JetBrains Mono',marginBottom:5}}>⭐ START HERE — lowest-friction fit</div>}
+            <div style={{fontSize:11.5,fontWeight:800,color:'var(--teal)',marginBottom:5}}>{a.focus}</div>
+            <div style={{fontSize:12,color:'var(--ink-soft)',lineHeight:1.45,marginBottom:8,flex:1}}>{a.why}</div>
+            <div style={{fontSize:10,fontFamily:'JetBrains Mono',color:'var(--ink-soft)'}}>brand deals: {a.deals}</div>
+          </div>))}
+        </div>
+      </>)}
+
+      {tab==="panel" && (<>
+        <div className="wip-banner" style={{background:'var(--brand-light)',border:'1.5px solid var(--brand-mid)'}}><span className="tag">THE SCORERS</span><p>Every brief’s <b>panel</b> score comes from these four synthetic snackers — not a black box. They’re modeled on Chasin’ Dreams’ real audience segments. Open any brief to see how each one reacts.</p></div>
+        <div className="grid grid-2">{PANEL.map((p,i)=>(
+          <div className="card" key={i}><div className="rail" style={{background:'var(--pink)'}}></div>
+            <div className="card-head"><div className="glyph" style={{background:'var(--brand-light)',fontSize:20}}>{p.emoji}</div><h3 style={{margin:0,fontFamily:'Baloo 2',fontWeight:800,fontSize:16,color:'var(--brand)'}}>{p.name}</h3></div>
+            <p className="detail">{p.bio}</p>
+            <div className="chips">{p.loves.map((l,j)=>(<span className="chip brand" key={j}>{l}</span>))}</div>
+          </div>))}
+        </div>
+      </>)}
+    </div>
+  );
+}
+
+function CastingMeter(){
+  const total=BRIEFS.length, world=BRIEFS.filter(b=>b.world).length, pct=Math.round(world/total*100);
+  return (
+    <div className="meter-card">
+      <div className="meter-top"><span style={{fontSize:20}}>🎉</span><h3>The Party Rule</h3><span className="pill" style={{marginLeft:'auto'}}>{pct}% brings the world this week</span></div>
+      <div style={{fontSize:12.5,color:'var(--ink-soft)',lineHeight:1.5}}>Right now the feed is ~90% shelf shots + product-in-hand — the brand world almost never shows up. This week’s mix flips that: <b>{world} of {total}</b> briefs put the Crunch Party (mascots, Syd, disco voice) into the feed.</div>
+      <div className="meter-bar"><div className="meter-fill" style={{width:pct+"%"}}>{world} bring the party</div><div className="meter-rest">{total-world} product/retail</div></div>
+      <div className="meter-legend"><span>Target trajectory: retail-proof <b>~90% → ≤20%</b> over the first quarter</span><span>Why it matters: <b>the personality on the bag is your biggest untapped asset</b></span></div>
+    </div>
+  );
+}
+
+function ContentBriefs({onOpen}){
+  const groups=Object.keys(PILLARS).map(pk=>({pk,...PILLARS[pk],briefs:BRIEFS.filter(b=>b.pillar===pk).sort((a,b)=>(getConv(b.id)?.score||0)-(getConv(a.id)?.score||0))}));
+  const scripted=BRIEFS.filter(b=>b.audioIG||b.audioTT).length, world=BRIEFS.filter(b=>b.world).length;
+  return (
+    <div className="wrap">
+      <div className="ride-hero">
+        <div className="ride-count">⚡ {BRIEFS.filter(b=>b.anchor).length} anchors</div>
+        <div><h2>THIS WEEK’S BEATS</h2><p>bring the party into the feed · make the cast the stars · trade shelf shots for personality</p></div>
+        <div className="ride-meta">{BRIEFS.length} briefs · {scripted} scripted video<br/>{world} bring the party into the feed 🎉</div>
+      </div>
+      <div className="section-eyebrow" style={{margin:'0 0 10px'}}>🎭 Meet the cast — this week's briefs are built around them</div>
+      <div className="cast-strip">{CAST.map((c,i)=>(<div className="cast-mini" key={i}><span className="cem">{c.emoji}</span><div><div className="crl">{c.role}</div><div className="cnm">{c.name}</div><div className="cln">{c.says}</div></div></div>))}</div>
+      <div className="read-hint"><span className="rh-ico">👀</span><div><b>New here? How to read a brief:</b> each card is a ready-to-shoot content idea for your team, grouped by the four <b>content pillars</b> (the colored headings). The green <b>score</b> is how confident we are it'll perform — hover it for the math. <b>Click any card</b> to open the full brief: a shot-by-shot storyboard, the words to post, and a live pre-test from four synthetic snackers. <b>party ✓</b> means it brings the Crunch Party world into the feed (not a bare product shot).</div></div>
+      <CastingMeter/>
+      {groups.map(g=>(
+        <div key={g.pk}>
+          <div className="pillar-head"><div className="pillar-sw" style={{background:g.color}}></div><h3>{g.name}</h3><span className="ct">{g.briefs.length} briefs</span></div>
+          <div className="grid grid-3">{g.briefs.map(b=>{const c=getConv(b.id);return(
+            <div className="brief" key={b.id} onClick={()=>onOpen(b)}>
+              <div className="rail" style={{background:g.color}}></div>
+              <div className="brief-top"><div className="glyph" style={{background:'var(--cream-deep)',width:30,height:30,fontSize:15}}>{DNA[b.dna]}</div>
+                {c&&(<span className={"conv c"+c.band}>{c.band} {c.score}<span className="tip">voice <b>{c.voice}</b> · panel <b>{c.panel}</b> · pulse <b>{c.pulse}</b><br/>avg {c.base} + recency {c.rec} = <b>{c.score}</b><br/>{c.band==="HIGH"?"ship first":c.band==="MEDIUM"?"solid bet":"hedge"}</span></span>)}
+              </div>
+              <h4>{b.concept}</h4>
+              <div className="brief-bottom"><span className="chip brand" title="Format type">{b.dna}</span><span className="chip plat" title="Where it posts">{b.plat}</span>{b.world&&<span className="nobaby" title="Brings the Crunch Party world into the feed">party ✓</span>}{b.anchor&&<span className="anchor-tag" title="A priority 'big swing' to lead the week">⚡ anchor</span>}</div>
+            </div>);})}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function bandFor(s){return s>=82?"hi":s>=70?"mid":"lo";}
+function BriefModal({b,onClose,onStudio}){
+  const c=getConv(b.id),P=PILLARS[b.pillar],reacts=panelReact(b);
+  const [pmode,setPmode]=useState("static"); // static | loading | live | error
+  const [live,setLive]=useState(null);
+  async function runPanel(){
+    setPmode("loading");
+    try{
+      const res=await fetch("/api/panel",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:b.id,concept:b.concept,hooks:b.hooks,caption:b.caption,pillar:P.name,dna:b.dna})});
+      if(!res.ok) throw new Error("api "+res.status);
+      const data=await res.json();
+      const emo={chloe:"🌾",kayla:"🥑",sage:"✨",mara:"🎒"}, nm={chloe:"Celiac Chloe",kayla:"Clean-Label Kayla",sage:"Snack-Girlie Sage",mara:"Lunchbox-Mom Mara"};
+      const norm=(data.reactions||[]).map(r=>({name:nm[r.key]||r.name||r.key,emoji:emo[r.key]||"✨",score:r.score,line:r.line,band:bandFor(r.score),share:r.share||""}));
+      if(!norm.length) throw new Error("empty");
+      setLive(norm); setPmode("live");
+    }catch(e){ setPmode("error"); }
+  }
+  const shown = pmode==="live"&&live ? live : reacts.map(r=>({name:r.p.name,emoji:r.p.emoji,score:r.score,line:r.line,band:r.band,share:""}));
+  const pc={hi:{background:'#E7F5EC',color:'#2E8B57'},mid:{background:'var(--accent-pale)',color:'var(--accent-deep)'},lo:{background:'#EFEDE7',color:'#8A8175'}};
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="modal" onClick={e=>e.stopPropagation()}>
+        <div className="modal-hero" style={{background:`linear-gradient(120deg, var(--brand-deep), ${P.color})`}}>
+          <button className="x" onClick={onClose}>×</button>
+          <div style={{fontFamily:'JetBrains Mono',fontSize:10,letterSpacing:'.1em',opacity:.85}}>{b.id} · {P.name}</div>
+          <h1 style={{fontFamily:'Fraunces',fontSize:21,margin:'7px 0 0',lineHeight:1.3,fontWeight:600}}>{b.concept}</h1>
+          <div style={{display:'flex',gap:6,flexWrap:'wrap',marginTop:12}}>
+            {c&&<span className="chip" style={{background:'rgba(255,255,255,.2)',color:'#fff'}}>Conviction {c.score} · {c.band}</span>}
+            <span className="chip" style={{background:'rgba(255,255,255,.2)',color:'#fff'}}>{b.plat}</span>
+            <span className="chip" style={{background:'rgba(255,255,255,.2)',color:'#fff'}}>{DNA[b.dna]} {b.dna}</span>
+            {b.world&&<span className="chip" style={{background:'rgba(255,255,255,.2)',color:'#fff'}}>🎉 brings the party</span>}
+            {b.ladder&&<span className="chip" style={{background:'var(--accent)',color:'var(--brand-deep)'}}>📈 builds demand</span>}
+          </div>
+        </div>
+        <div className="modal-body">
+          <div className="m-sec"><div className="m-sec-label">💡 Why this brief, this week</div><div style={{fontSize:13,lineHeight:1.55,color:'var(--ink-soft)'}}>{b.why}</div></div>
+          <div className="m-sec"><div className="m-sec-label">📡 Intel that drove this</div>{b.drove.map((d,i)=>(<div className="intel-row" key={i}><span>↳</span><div>{d}</div></div>))}</div>
+          <div className="m-sec"><div className="m-sec-label">📱 Shot list · {b.scenes.length} shots</div>
+            <div className="phone-row">{b.scenes.map((s,i)=>(<div className="phone" key={i}><div className="phone-screen"><div className="phone-top"><span className="phone-scene">SHOT {i+1}</span><span className="phone-sec">{s.t}</span></div><div className="phone-do">{s.dofilm}</div>{s.txt&&<div className="phone-osd"><span className="osl">ON SCREEN</span>{s.txt}</div>}<div className="phone-cap">{b.plat.includes("TikTok")?"vertical · 9:16":"reel · 9:16"}</div></div></div>))}</div>
+          </div>
+          <div className="m-sec"><div className="m-sec-label">✍️ The words</div>
+            <div className="words-sub">Hooks · the opening line / on-screen (pick one)</div>
+            {b.hooks.map((h,i)=>(<div className={"hookrow"+(i===b.rec?" rec":"")} key={i}>{i===b.rec&&<span className="rec-tag">★ RECOMMENDED</span>}{h}</div>))}
+            <div className="words-sub" style={{marginTop:15}}>Caption · the post text</div>
+            <div className="capvar"><div className="cvlabel"><span>ready to post</span><button className="copybtn" onClick={()=>navigator.clipboard&&navigator.clipboard.writeText(b.caption)}>copy</button></div><p>{b.caption}</p></div>
+          </div>
+          <div className="m-sec"><div className="m-sec-label">✨ Snack Panel {pmode==="live"?<span className="panel-live-badge">● LIVE</span>:"pre-test"}</div>
+            <div className="panel-head">
+              <span className="panel-note">{pmode==="live"?"Fresh reactions from the four personas, generated just now.":pmode==="error"?"The live panel runs once this is deployed with the API key — showing the modeled read for now.":pmode==="loading"?"Asking the four personas to react…":"A modeled read from the four personas. Run it live for a fresh take on this exact brief."}</span>
+              {pmode!=="live"&&<button className="panel-run" onClick={runPanel} disabled={pmode==="loading"}>{pmode==="loading"?"thinking…":"⚡ Run the live panel"}</button>}
+            </div>
+            {shown.map((r,i)=>(<div className="panel-react" key={i}><div className="panel-av">{r.emoji}</div><div style={{flex:1}}><div style={{display:'flex',alignItems:'center'}}><span className="panel-name">{r.name}</span>{r.share&&<span className="panel-share">{r.share}</span>}<span className="panel-score" style={pc[r.band]}>{r.score}</span></div><div className="panel-line">"{r.line}"</div></div></div>))}
+          </div>
+          <details className="acc"><summary>🎬 Production <span className="chev">▾</span></summary><div className="acc-body"><b>Visual direction:</b> {b.visual}<br/><br/><b>Audio — IG:</b> {b.audioIG||"n/a (still/carousel)"}<br/><b>Audio — TikTok:</b> {b.audioTT||"n/a (still/carousel)"}</div></details>
+          <details className="acc"><summary>📈 Why it builds demand <span className="chev">▾</span></summary><div className="acc-body">{b.ladder?"This brief builds real consumer demand — personality or story that makes people want the product, not just proof it exists on a shelf.":"This one’s pure top-of-funnel reach + personality — it earns attention and affinity without a hard sell. Not every brief needs a direct push; the mix does."}</div></details>
+          <Btn style={{width:'100%',padding:13,marginTop:6}} onClick={()=>onStudio(b)}>↓ Sharpen this in Studio</Btn>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MilestoneMap(){
+  const [i,setI]=useState(0);const m=CAST[i];
+  return (
+    <div className="wrap">
+      <div className="ride-hero" style={{marginBottom:16}}>
+        <div><h2>The Cast</h2><p>the mascots + Syd, turned into characters. this is the content engine no competitor has — the M&amp;M’s ensemble model, built from the world you already own.</p></div>
+      </div>
+      <div className="mm-bands">{CAST.map((b,j)=>(<div key={j} className={"mm-band"+(i===j?" on":"")} onClick={()=>setI(j)}><div className="age" style={{fontSize:26}}>{b.emoji}</div><div className="lbl">{b.name}</div></div>))}</div>
+      <div className="mm-detail">
+        <div className="mm-flow">
+          <div className="mm-step"><div className="mstage">🎭 WHO THEY ARE</div><h4>{m.name} · {m.role}</h4><p>{m.trait}</p></div>
+          <div className="mm-step"><div className="mstage">💬 THEIR LINE</div><h4>The catchphrase</h4><p>{m.says}</p></div>
+          <div className="mm-step"><div className="mstage">🏷️ ANCHORED TO</div><h4>A real truth</h4><p>{m.truth}</p></div>
+          <div className="mm-step"><div className="mstage">🎬 A BIT TO SHOOT</div><h4>Put them in motion</h4><p>{m.bit}</p></div>
+        </div>
+        <div className="mm-cta">🎉 <span>Give each one a sharp personality + a group dynamic and you can generate content forever (the M&amp;M’s model). This is the single biggest asset no competitor in the category has.</span></div>
+      </div>
+      <div className="section-eyebrow">Why the cast is the unlock</div>
+      <div className="grid grid-3">
+        <div className="card"><div className="rail" style={{background:'var(--purple)'}}></div><h3>You own what others invent</h3><p className="detail">Duolingo, Nutter Butter and M&amp;M’s had to build a character, a world, and a cast from scratch. Yours are already drawn — they just need to talk.</p></div>
+        <div className="card"><div className="rail" style={{background:'var(--purple)'}}></div><h3>An ensemble never runs dry</h3><p className="detail">One personality each + a group dynamic = endless scenes without repeating. Three mascots is a feature, not a complication.</p></div>
+        <div className="card"><div className="rail" style={{background:'var(--purple)'}}></div><h3>Cheap to start</h3><p className="detail">Props, POV, and ‘mascot reacts’ cost almost nothing (the Scrub Daddy / Nutter Butter route). Rough beats polished — you just have to begin.</p></div>
+      </div>
+    </div>
+  );
+}
+
+// ---- lightweight markdown → React (ported OBSOLETE renderer) ----
+function stInline(t){
+  const nodes=[]; let key=0, last=0, m;
+  const re=/(\*\*([^*]+)\*\*)|(\*([^*]+)\*)|(`([^`]+)`)|(\[([^\]]+)\]\(([^)]+)\))/g;
+  while((m=re.exec(t))){
+    if(m.index>last) nodes.push(t.slice(last,m.index));
+    if(m[1]) nodes.push(<strong key={key++}>{m[2]}</strong>);
+    else if(m[3]) nodes.push(<em key={key++}>{m[4]}</em>);
+    else if(m[5]) nodes.push(<code key={key++}>{m[6]}</code>);
+    else if(m[7]) nodes.push(<a key={key++} href={m[9]} target="_blank" rel="noopener noreferrer">{m[8]}</a>);
+    last=re.lastIndex;
+  }
+  if(last<t.length) nodes.push(t.slice(last));
+  return nodes;
+}
+function renderMarkdown(md){
+  const lines=(md||"").split("\n"), out=[]; let i=0,key=0,list=null,lt=null;
+  const flush=()=>{ if(list){ out.push(lt==="ol"?<ol key={key++}>{list}</ol>:<ul key={key++}>{list}</ul>); list=null; } };
+  const special=s=>/^(#{1,3}\s|>\s?|\s*[-*]\s|\s*\d+\.\s|\s*(---|\*\*\*)\s*$)/.test(s);
+  while(i<lines.length){
+    const ln=lines[i];
+    if(/^\s*$/.test(ln)){ flush(); i++; continue; }
+    if(/^###\s+/.test(ln)){ flush(); out.push(<h4 key={key++}>{stInline(ln.replace(/^###\s+/,''))}</h4>); i++; continue; }
+    if(/^#{1,2}\s+/.test(ln)){ flush(); out.push(<h3 key={key++}>{stInline(ln.replace(/^#{1,2}\s+/,''))}</h3>); i++; continue; }
+    if(/^\s*(---|\*\*\*)\s*$/.test(ln)){ flush(); out.push(<hr key={key++}/>); i++; continue; }
+    if(/^\s*>\s?/.test(ln)){ flush(); out.push(<blockquote key={key++}>{stInline(ln.replace(/^\s*>\s?/,''))}</blockquote>); i++; continue; }
+    const om=ln.match(/^\s*\d+\.\s+(.*)/);
+    if(om){ if(lt!=="ol"){flush();lt="ol";} if(!list)list=[]; list.push(<li key={key++}>{stInline(om[1])}</li>); i++; continue; }
+    const um=ln.match(/^\s*[-*]\s+(.*)/);
+    if(um){ if(lt!=="ul"){flush();lt="ul";} if(!list)list=[]; list.push(<li key={key++}>{stInline(um[1])}</li>); i++; continue; }
+    flush(); const para=[ln]; i++;
+    while(i<lines.length && !/^\s*$/.test(lines[i]) && !special(lines[i])){ para.push(lines[i]); i++; }
+    out.push(<p key={key++}>{stInline(para.join(" "))}</p>);
+  }
+  flush();
+  return out;
+}
+
+const SUGG_DEFAULT=[
+  {l:"MASCOT BIT",q:"Write 3 lines for Avo working the velvet rope."},
+  {l:"TREND",q:"Give me a Food Jutsu script that summons the cast."},
+  {l:"MOMENT",q:"What should we post the day after the World Cup Final?"},
+  {l:"SERIES",q:"Turn Syd’s origin into a 4-part series."},
+];
+const SUGG_BRIEF=[
+  {l:"SHARPEN",q:"Sharpen the recommended hook — give me 3 punchier versions."},
+  {l:"CAPTION",q:"Write 2 more caption options in Syd’s voice."},
+  {l:"REMIX",q:"Give me an alternate shot list for this same concept."},
+  {l:"GUT-CHECK",q:"What’s the weakest part of this brief, and how would you fix it?"},
+];
+const SUGG_SIGNAL=[
+  {l:"BRIEF IT",q:"Turn this signal into a ready-to-shoot brief."},
+  {l:"IDEAS",q:"Give me 3 post ideas riding this."},
+  {l:"CAST",q:"Which mascot should front this, and why?"},
+  {l:"HOOKS",q:"Write 3 hooks for this signal in our voice."},
+];
+
+function Studio({seed,onClearSeed}){
+  const [msgs,setMsgs]=useState([]);
+  const [input,setInput]=useState("");
+  const [busy,setBusy]=useState(false);
+  const [err,setErr]=useState("");
+  const scroll=useRef(null);
+  useEffect(()=>{ if(scroll.current) scroll.current.scrollTop=scroll.current.scrollHeight; },[msgs,err]);
+  const ctxLabel = seed ? (seed.type==="brief" ? seed.brief.concept : seed.text) : null;
+  const sugg = seed ? (seed.type==="brief"?SUGG_BRIEF:SUGG_SIGNAL) : SUGG_DEFAULT;
+  async function send(text){
+    const q=(text!=null?text:input).trim(); if(!q||busy) return;
+    setInput(""); setErr("");
+    const base=[...msgs,{role:"user",content:q}];
+    setMsgs([...base,{role:"assistant",content:""}]); setBusy(true);
+    try{
+      const res=await fetch("/api/studio",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:base,seed})});
+      if(!res.ok||!res.body) throw new Error("api");
+      const rd=res.body.getReader(),dec=new TextDecoder(); let acc="";
+      for(;;){ const {done,value}=await rd.read(); if(done) break; acc+=dec.decode(value,{stream:true}); setMsgs(m=>{const c=m.slice();c[c.length-1]={role:"assistant",content:acc};return c;}); }
+      if(!acc.trim()) throw new Error("empty");
+    }catch(e){
+      setMsgs(m=>m.slice(0,-1));
+      setErr("The Strategist goes live the moment this is deployed to Vercel with your ANTHROPIC_API_KEY. Running locally there’s no server to answer — but the flow, the context, and the whole engine brain are wired and ready.");
+    }finally{ setBusy(false); }
+  }
+  function onKey(e){ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); send(); } }
+  return (
+    <div className="wrap"><div className="studio">
+      {seed&&<div className="st-ctx"><span className="stx-lbl">{seed.type==="brief"?"✦ Sharpening brief":"✦ Riding signal"}</span><b>{ctxLabel}</b><button className="stx-x" onClick={onClearSeed} title="clear context">×</button></div>}
+      <div className="st-scroll" ref={scroll}>
+        {msgs.length===0 && (
+          <div className="st-empty">
+            <div style={{fontSize:34}}>🧠</div>
+            <h2>The Strategist</h2>
+            <p>Loaded with the full Chasin’ Dreams engine — the voice, the four pillars, the Party Rule, the mascot cast, and the snack panel. Ask for scripts, hooks, series, or a gut-check.{seed?" It already has this "+(seed.type==="brief"?"brief":"signal")+" in context — just ask.":""}</p>
+            <div className="st-sugg">{sugg.map((s,i)=>(<button className="st-sg" key={i} onClick={()=>send(s.q)}><span className="sgl">{s.l}</span>{s.q}</button>))}</div>
+          </div>
+        )}
+        {msgs.map((m,i)=>(
+          <div className={"msg "+(m.role==="user"?"user":"bot")} key={i}>
+            <div className="msg-av">{m.role==="user"?"🥑":"🧠"}</div>
+            <div className="msg-bub">{m.role==="user"?m.content:(m.content?<>{renderMarkdown(m.content)}{busy&&i===msgs.length-1&&<span className="blink"></span>}</>:<span className="blink"></span>)}</div>
+          </div>
+        ))}
+        {err&&<div className="st-err">{err}</div>}
+      </div>
+      <div className="st-inputbar">
+        <textarea className="st-input" rows={1} value={input} placeholder="Ask the Strategist anything…" onChange={e=>setInput(e.target.value)} onKeyDown={onKey} disabled={busy}/>
+        <button className="st-send" onClick={()=>send()} disabled={busy||!input.trim()}>↑</button>
+      </div>
+    </div></div>
+  );
+}
+
+function HowItWorks(){
+  return (
+    <div className="wrap">
+      <div style={{background:'linear-gradient(120deg,var(--brand-deep),var(--brand) 58%,var(--purple))',color:'#fff',borderRadius:20,padding:'28px 30px',marginBottom:22}}>
+        <div style={{fontFamily:'JetBrains Mono',fontSize:10,letterSpacing:'.12em',opacity:.85,marginBottom:8}}>WHAT IS THIS?</div>
+        <h2 style={{fontSize:27,margin:0,lineHeight:1.2,fontWeight:900}}>An always-on content strategist for Chasin’ Dreams.</h2>
+        <p style={{color:'#F8DBF0',fontSize:14.5,marginTop:10,maxWidth:670,lineHeight:1.55}}>Every week, it reads what’s happening in snack culture and on your own feed, finds the moments worth riding, and hands your team ready-to-shoot content ideas. So Monday starts with the briefs — not a blank page.</p>
+      </div>
+
+      <div className="section-eyebrow">How it works, in 4 steps</div>
+      <div className="step-band">
+        {[["01","We listen","Every week we scan snack + clean-label culture, the live trends, and your own feed."],["02","We spot the signals","We flag what’s genuinely worth riding — and skip what isn’t (would the Crunch Party actually show up here?)."],["03","We write the briefs","You get ready-to-shoot ideas — hooks, captions, a shot list — not a pile of research."],["04","You post","Your team shoots + posts. The engine never posts for you; you’re always in control."]].map((st,i)=>(<div className={"step-cell"+(i===3?" you":"")} key={i}><div className="step-num">{st[0]}</div><h4>{st[1]}</h4><p>{st[2]}</p></div>))}
+      </div>
+
+      <div className="section-eyebrow">Why it matters for you</div>
+      <PerfChart/>
+      <div className="perf-punch" style={{marginTop:14}}><b>And here’s the kicker:</b> you already own the three things those breakout brands had to invent — a built world (the Crunch Party), a mascot cast (Avo · Sorghum · Rice), and a founder who’s comfortable on camera. They’re just not in the feed yet. That’s the whole opportunity.</div>
+
+      <div className="section-eyebrow">What it does — and doesn’t do</div>
+      <div className="grid grid-2" style={{marginBottom:8}}>
+        <div className="card"><div className="rail" style={{background:'var(--green)'}}></div><h3 style={{color:'var(--brand)'}}>✓ It does</h3><p className="detail">Find the trends. Write the briefs. Score each on how well it fits. Keep your brand voice consistent. Tell you what to ride this week — and why.</p></div>
+        <div className="card"><div className="rail" style={{background:'var(--ink-soft)'}}></div><h3 style={{color:'var(--ink-soft)'}}>✗ It doesn’t</h3><p className="detail">Post for you. Replace your team. Make you use anything. Every call is a recommendation you can accept, tweak, or ignore — you stay in the driver’s seat.</p></div>
+      </div>
+
+      <div className="section-eyebrow">Want the detail?</div>
+      <details className="acc"><summary>📣 The calls the engine made this week <span className="chev">▾</span></summary><div className="acc-body">{DECISIONS.map((d,i)=>(<div key={i} style={{marginBottom:11}}><span className={"dverb "+d.cls}>{d.verb}</span> <b style={{color:'var(--ink)'}}>{d.t}</b><div style={{marginTop:3}}>{d.d}</div></div>))}</div></details>
+      <details className="acc"><summary>🚧 The brand fence — what it refuses to do <span className="chev">▾</span></summary><div className="acc-body"><ul style={{margin:0,paddingLeft:18,lineHeight:1.6}}>{ANTI_PATTERNS.map((a,i)=>(<li key={i} style={{marginBottom:6}}>{a}</li>))}</ul></div></details>
+    </div>
+  );
+}
+
+function DiagnosticInbox({onClose}){
+  const QS=[
+    {id:"assets",rail:"var(--purple)",icon:"🎨",q:"Do the mascots exist as usable assets — or just art on the bag?",d:"The whole plan hinges on putting Avo, Sorghum & Rice in motion. Do you have illustration / animation files (a rig we could animate), or would we start with props + POV?",opts:["Yes — we have the files","Only static art right now","Not sure / need to check"]},
+    {id:"who",rail:"var(--brand)",icon:"🎬",q:"Who makes the content today — and how much time do they have?",d:"Bandwidth is the real constraint for a 3-person team. Is it Syd, an intern, an agency? This shapes how much we lean on cheap formats vs. produced ones.",opts:["Syd herself","An intern / team member","An agency / freelancer","Nobody consistently"]},
+    {id:"retail",rail:"var(--green)",icon:"🛒",q:"Where are you actually on shelf right now?",d:"We couldn’t verify Whole Foods / Costco / Seaside from the outside. Knowing your real doors keeps every ‘find us at’ post honest — and tells us where local creator activations pay off.",opts:["Whole Foods (which regions?)","Other retail + DTC / Amazon","Mostly DTC + Amazon for now"]},
+  ];
+  const [ans,setAns]=useState({});const [free,setFree]=useState("");const [freeLocked,setFreeLocked]=useState(false);
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="modal" onClick={e=>e.stopPropagation()} style={{maxWidth:560}}>
+        <div className="modal-hero"><button className="x" onClick={onClose}>×</button><h1 style={{fontSize:23,margin:'2px 0',fontWeight:900}}>Diagnostic Inbox</h1><div style={{fontFamily:'Fraunces',fontStyle:'italic',fontSize:13.5,opacity:.92}}>3 questions only you can answer — they turn our hypothesis into your plan</div></div>
+        <div className="modal-body">
+          {QS.map(Q=>(<div className="card" key={Q.id} style={{marginBottom:12,padding:16}}><div className="rail" style={{background:Q.rail}}></div>
+            <h4 style={{fontSize:14,margin:'0 0 4px',color:'var(--brand)'}}>{Q.icon} {Q.q}</h4><p style={{fontSize:12.5,color:'var(--ink-soft)',margin:'0 0 12px',lineHeight:1.45}}>{Q.d}</p>
+            {ans[Q.id]?.locked?(<div style={{background:'#F1FAF0',border:'1px solid var(--green)',borderRadius:10,padding:'10px 12px',fontSize:12.5}}><b style={{color:'var(--green)',fontFamily:'JetBrains Mono',fontSize:9}}>✓ LOCKED IN</b> — {ans[Q.id].value} <button style={{background:'none',border:'none',color:'var(--ink-soft)',fontSize:11,cursor:'pointer',marginLeft:6}} onClick={()=>setAns({...ans,[Q.id]:{...ans[Q.id],locked:false}})}>↺ change</button></div>):(<>
+              {Q.opts.map((o,i)=>(<button key={i} onClick={()=>setAns({...ans,[Q.id]:{value:o,locked:false}})} style={{display:'block',width:'100%',textAlign:'left',background:ans[Q.id]?.value===o?'var(--accent-pale)':'var(--cream)',border:'1.5px solid '+(ans[Q.id]?.value===o?'var(--brand)':'var(--border)'),borderRadius:10,padding:'10px 12px',marginBottom:7,fontSize:12.5,cursor:'pointer',fontWeight:ans[Q.id]?.value===o?800:600,fontFamily:'Nunito'}}>{o}</button>))}
+              {ans[Q.id]?.value&&<Btn style={{width:'100%',padding:9,fontSize:12,marginTop:2}} onClick={()=>setAns({...ans,[Q.id]:{...ans[Q.id],locked:true}})}>Lock it in →</Btn>}
+            </>)}
+          </div>))}
+          <div className="card" style={{padding:16}}><div className="rail" style={{background:'var(--brand)'}}></div><h4 style={{fontSize:14,margin:'0 0 4px',color:'var(--brand)'}}>💭 Anything else?</h4><p style={{fontSize:12.5,color:'var(--ink-soft)',margin:'0 0 10px'}}>What are we missing, or reading wrong?</p>
+            {freeLocked?(<div style={{background:'#F1FAF0',border:'1px solid var(--green)',borderRadius:10,padding:'10px 12px',fontSize:12.5}}><b style={{color:'var(--green)',fontFamily:'JetBrains Mono',fontSize:9}}>✓ NOTED</b> — {free} <button style={{background:'none',border:'none',color:'var(--ink-soft)',fontSize:11,cursor:'pointer',marginLeft:6}} onClick={()=>setFreeLocked(false)}>↺ edit</button></div>):(<>
+              <textarea value={free} onChange={e=>setFree(e.target.value)} placeholder="Tell us where we're off…" style={{width:'100%',minHeight:70,border:'1.5px solid var(--border)',borderRadius:10,padding:10,fontFamily:'Nunito',fontSize:12.5,resize:'vertical'}}></textarea>
+              {free.trim()&&<Btn style={{width:'100%',padding:9,fontSize:12,marginTop:6}} onClick={()=>setFreeLocked(true)}>Save note →</Btn>}
+            </>)}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function WIPTab({kind}){
+  return (
+    <div className="wrap">
+      <div className="wip-banner"><span className="tag">🚧 UNDER CONSTRUCTION</span><p>A preview of what's coming once OPERATE goes live. {kind==="cal"?"A rolling content calendar with format-mix balance + amplification markers.":"Performance tracking — reach, saves, follower growth + sales — wired to your actual accounts."} Below is placeholder content so you can see the shape.</p></div>
+      {kind==="cal"?(<div className="grid" style={{gridTemplateColumns:'repeat(7,1fr)',gap:8}}>{["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map((d,i)=>(<div className="card" key={i} style={{padding:12,minHeight:130}}><div style={{fontFamily:'JetBrains Mono',fontSize:10,color:'var(--ink-soft)',marginBottom:8}}>{d}</div>{i<5&&<div style={{background:'var(--cream)',borderRadius:8,padding:'6px 8px',fontSize:10,marginBottom:5}}>{["🥑 mascot bit","⭐ Syd host","🔊 crunch ASMR","💬 reply-guy","🎊 flavor drop"][i]}</div>}</div>))}</div>):(<div className="kpi-grid">{["Reach","Saves","Profile visits","New followers"].map((k,i)=>(<div className="kpi" key={i}><div className="soon">SOON</div><div className="kv">—</div><div className="kl">{k}</div></div>))}</div>)}
+    </div>
+  );
+}
+
+function App(){
+  const [nav,setNav]=useState("intel");const [memo,setMemo]=useState(true);const [brief,setBrief]=useState(null);const [diag,setDiag]=useState(false);const [studioSeed,setStudioSeed]=useState(null);
+  const NAV=[["intel","Intelligence Brief","📡"],["briefs","Content Briefs","📝"],["studio","Studio","🧠"],["how","How It Works","⚙️"],["cal","Calendar","📅","wip"],["perf","Performance","📊","wip"]];
+  const NAV_DESC={intel:"The trends we're watching + how to ride them",briefs:"Ready-to-shoot content ideas for your team",map:"Meet the mascot cast (Avo · Sorghum · Rice)",studio:"Your always-on content strategist — ask it anything",how:"How the engine turns a trend into a brief",cal:"A rolling content calendar (coming soon)",perf:"Reach + follower results (coming soon)"};
+  return (
+    <>
+      {memo&&<MondayMemo onClose={()=>setMemo(false)} onGo={()=>{setMemo(false);setNav("intel");}}/>}
+      {brief&&<BriefModal b={brief} onClose={()=>setBrief(null)} onStudio={(bb)=>{setStudioSeed({type:'brief',brief:bb});setBrief(null);setNav("studio");}}/>}
+      {diag&&<DiagnosticInbox onClose={()=>setDiag(false)}/>}
+      <div className="app">
+        <div className="side">
+          <div className="logo"><div className="logo-blocks"><div className="blk" style={{background:'var(--accent)',color:'var(--brand-deep)'}}>🪩</div><div className="blk" style={{background:'var(--brand)',color:'#fff'}}>🥑</div><div className="blk" style={{background:'var(--purple)',color:'#fff'}}>🌾</div></div><div className="logo-name">CHASIN’ DREAMS</div><div className="logo-sub">a party in every crunch</div></div>
+          {NAV.map(n=>(<button key={n[0]} title={NAV_DESC[n[0]]} className={"nav-item"+(nav===n[0]?" on":"")} onClick={()=>setNav(n[0])}><span className="ico">{n[2]}</span>{n[1]}{n[3]==="new"&&<span className="nav-new">NEW</span>}{n[3]==="wip"&&<span className="nav-wip">WIP</span>}</button>))}
+          <div className="side-spacer"></div>
+          <Btn onClick={()=>setDiag(true)}>📮 Diagnostic Inbox</Btn>
+          <button className="howlink" onClick={()=>setNav("how")}>↓ how it works</button>
+        </div>
+        <div className="main">
+          <div className="page-head">
+            <div><h1>{ {intel:"Intelligence Brief",briefs:"Content Briefs",map:"The Cast",studio:"Studio",how:"How It Works",cal:"Calendar",perf:"Performance"}[nav] }</h1>
+              <p className="dek">{ {intel:"What’s moving in snack + clean-label culture this week — and exactly how the Crunch Party could ride each one.",briefs:"Ready-to-shoot content ideas, built from the trends on the left. Click any card to open the full brief.",map:"The mascots + Syd, turned into a cast of characters — the content engine no competitor has.",studio:"Your always-on content strategist, loaded with the full engine context.",how:"One signal, start to finish — how a trend we spot becomes next week’s post.",cal:"A rolling content calendar (coming once we’re working together).",perf:"Reach, saves, and follower results (coming once we’re working together)."}[nav] }</p>
+            </div>
+            <div className="pill"><span className="live-dot"></span>Live · {WEEK}</div>
+          </div>
+          {!memo&&nav==="intel"&&(<div className="ticker"><div className="ticker-track">{[...TICKER,...TICKER].map((t,i)=>(<span key={i}><span className="tdot" style={{background:{signal:'var(--brand-mid)',pulse:'var(--coral)',decision:'var(--accent)',win:'var(--green)',warn:'var(--warn)'}[t[0]]}}></span>{t[1]}</span>))}</div></div>)}
+          {nav==="intel"&&<IntelBrief onDrop={(txt)=>{setStudioSeed(txt?{type:'signal',text:txt}:null);setNav("studio");}} onOpen={setBrief}/>}
+          {nav==="briefs"&&<ContentBriefs onOpen={setBrief}/>}
+          {nav==="studio"&&<Studio seed={studioSeed} onClearSeed={()=>setStudioSeed(null)}/>}
+          {nav==="how"&&<HowItWorks/>}
+          {nav==="cal"&&<WIPTab kind="cal"/>}
+          {nav==="perf"&&<WIPTab kind="perf"/>}
+          <div className="foot"><b>Chasin’ Dreams Farm Engine</b> · OBSOLETE V0.1 · {WEEK} · public-signal hypothesis · built to be argued with</div>
+        </div>
+      </div>
+    </>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<ErrorBoundary><App/></ErrorBoundary>);
+</script>
+</body>
+</html>
