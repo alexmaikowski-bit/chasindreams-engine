@@ -685,7 +685,7 @@ function IntelBrief({onDrop,onOpen,focus,onFocusDone}){
     <div className="wrap">
       <div className="subtabs">{tabs.map(([k,l,n])=>(<button key={k} className={"subtab"+(tab===k?" on":"")} onClick={()=>setTab(k)}>{l}<span className="badge">{n}</span></button>))}</div>
 
-      {(tab==="pulse"||tab==="trends") && (<div className="read-hint"><span className="rh-ico">👀</span><div><b>New here? How to read a card:</b> each one is a real signal we found (tap the grey <b>source chips</b> to verify it), then <b>▶ The Play</b> is exactly how we'd use it. A <span className="lnow">● LIVE NOW</span> tag means it's moving this week; <span className="ltail">◈ TAILWIND</span> means a durable force at your back. The yellow <b>↳ we turned this into a brief</b> link opens the ready-to-shoot content it generated.</div></div>)}
+      {(tab==="pulse"||tab==="trends") && (<div className="read-hint"><span className="rh-ico">👀</span><div><b>New here? How to read a card:</b><ul className="rh-list"><li>Each card is a real signal we found — tap the grey <b>source chips</b> to verify it.</li><li><b>▶ The Play</b> is exactly how we'd use it.</li><li>A <span className="lnow">● LIVE NOW</span> tag means it's moving this week; <span className="ltail">◈ TAILWIND</span> means a durable force at your back.</li><li>The yellow <b>↳ we turned this into a brief</b> link opens the ready-to-shoot content it generated.</li></ul></div></div>)}
 
       {tab==="pulse" && (<>
         <div className="mom-cols">
