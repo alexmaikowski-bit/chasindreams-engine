@@ -31,7 +31,7 @@ Return ONLY valid JSON, no prose, in exactly this shape:
 
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") { res.status(405).json({ error: "POST only" }); return; }
-  const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+  const key = process.env.GEMINI_API_KEY;
   if (!key) { res.status(500).json({ error: "GEMINI_API_KEY not set" }); return; }
 
   let body = req.body;
