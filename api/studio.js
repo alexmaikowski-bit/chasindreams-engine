@@ -28,7 +28,7 @@ HOW YOU ANSWER: get straight to usable output — hooks, scripts, captions, shot
 
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") { res.status(405).end("POST only"); return; }
-  const key = process.env.GEMINI_API_KEY;
+  const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
   if (!key) { res.status(500).end("no key"); return; }
 
   let body = req.body;
