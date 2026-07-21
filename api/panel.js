@@ -1,12 +1,12 @@
 // Chasin' Dreams — live Snack Panel
-// Vercel Node serverless function. Reads a brief, asks Gemini to react AS the
+// Vercel Node serverless function. Reads a brief, asks Claude to react AS the
 // four audience personas, returns { reactions: [{key,score,line,share}] }.
 //
-// Deploy: drop this repo on Vercel and set GEMINI_API_KEY in the project's
+// Deploy: drop this repo on Vercel and set ANTHROPIC_API_KEY in the project's
 // Environment Variables. (Optional: PANEL_MODEL to override the model.)
 // Until then the engine falls back to the modeled read automatically.
 
-const MODEL = process.env.PANEL_MODEL || "gemini-2.5-flash";
+const MODEL = process.env.PANEL_MODEL || "claude-sonnet-5";
 
 const PERSONAS = [
   { key: "chloe", name: "Celiac Chloe",
@@ -31,8 +31,8 @@ Return ONLY valid JSON, no prose, in exactly this shape:
 
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") { res.status(405).json({ error: "POST only" }); return; }
-  const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-  if (!key) { res.status(500).json({ error: "GEMINI_API_KEY not set" }); return; }
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) { res.status(500).json({ error: "ANTHROPIC_API_KEY not set" }); return; }
 
   let body = req.body;
   if (typeof body === "string") { try { body = JSON.parse(body); } catch (e) { body = {}; } }
@@ -51,20 +51,23 @@ ${PERSONAS.map(p => `- ${p.key} (${p.name}): ${p.bio}`).join("\n")}
 React as all four. Return ONLY the JSON.`;
 
   try {
-    const url = "https://generativelanguage.googleapis.com/v1beta/models/" +
-      encodeURIComponent(MODEL) + ":generateContent?key=" + encodeURIComponent(key);
-    const r = await fetch(url, {
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": key,
+        "anthropic-version": "2023-06-01",
+      },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM }] },
-        contents: [{ role: "user", parts: [{ text: user }] }],
-        generationConfig: { temperature: 0.9, responseMimeType: "application/json", maxOutputTokens: 4096, thinkingConfig: { thinkingBudget: 0 } },
+        model: MODEL,
+        max_tokens: 1024,
+        system: SYSTEM,
+        messages: [{ role: "user", content: user }],
       }),
     });
-    if (!r.ok) { const t = await r.text(); res.status(502).json({ error: "gemini " + r.status, detail: t.slice(0, 400) }); return; }
+    if (!r.ok) { const t = await r.text(); res.status(502).json({ error: "anthropic " + r.status, detail: t.slice(0, 400) }); return; }
     const j = await r.json();
-    const txt = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts && j.candidates[0].content.parts.map(p => p && p.text || "").join("")) || "";
+    const txt = (j.content && j.content[0] && j.content[0].text) || "";
     const m = txt.match(/\{[\s\S]*\}/);
     const parsed = JSON.parse(m ? m[0] : txt);
     res.status(200).json({ reactions: parsed.reactions || [] });

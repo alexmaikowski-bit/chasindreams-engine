@@ -1026,7 +1026,7 @@ function Studio({seed,onClearSeed}){
       if(!acc.trim()) throw new Error("empty");
     }catch(e){
       setMsgs(m=>m.slice(0,-1));
-      setErr("The Strategist goes live the moment this is deployed to Vercel with your GEMINI_API_KEY. Running locally there’s no server to answer — but the flow, the context, and the whole engine brain are wired and ready.");
+      setErr("The Strategist goes live the moment this is deployed to Vercel with your ANTHROPIC_API_KEY. Running locally there’s no server to answer — but the flow, the context, and the whole engine brain are wired and ready.");
     }finally{ setBusy(false); }
   }
   function onKey(e){ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); send(); } }

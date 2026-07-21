@@ -1,11 +1,11 @@
 // Chasin' Dreams — The Strategist (Studio chat)
-// Vercel Node serverless function. Streams Gemini 2.5 Flash's reply back token-by-token.
+// Vercel Node serverless function. Streams Claude's reply back token-by-token.
 //
-// Deploy: drop this repo on Vercel + set GEMINI_API_KEY in Environment
+// Deploy: drop this repo on Vercel + set ANTHROPIC_API_KEY in Environment
 // Variables. (Optional: STUDIO_MODEL to override the model.) Until then the
 // Studio tab shows a friendly "goes live on deploy" note.
 
-const MODEL = process.env.STUDIO_MODEL || "gemini-2.5-flash";
+const MODEL = process.env.STUDIO_MODEL || "claude-sonnet-5";
 
 const SYSTEM =
 `You are The Strategist — the always-on content strategist inside the Chasin' Dreams Farm marketing engine, built by OBSOLETE. You help Syd (the founder) and her tiny team turn ideas into ready-to-shoot content. You're warm, sharp, fast and practical — a creative director who knows this brand cold.
@@ -28,7 +28,7 @@ HOW YOU ANSWER: get straight to usable output — hooks, scripts, captions, shot
 
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") { res.status(405).end("POST only"); return; }
-  const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+  const key = process.env.ANTHROPIC_API_KEY;
   if (!key) { res.status(500).end("no key"); return; }
 
   let body = req.body;
@@ -43,24 +43,28 @@ module.exports = async function handler(req, res) {
     ctx = `\n\n[CONTEXT — the user wants to ride THIS signal]\n${seed.text}`;
   }
 
-  const contents = (messages || [])
+  const clean = (messages || [])
     .filter(m => m && m.content && (m.role === "user" || m.role === "assistant"))
-    .map(m => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: String(m.content) }] }));
-  if (!contents.length) { res.status(400).end("no messages"); return; }
+    .map(m => ({ role: m.role, content: String(m.content) }));
+  if (!clean.length) { res.status(400).end("no messages"); return; }
 
   try {
-    const url = "https://generativelanguage.googleapis.com/v1beta/models/" +
-      encodeURIComponent(MODEL) + ":streamGenerateContent?alt=sse&key=" + encodeURIComponent(key);
-    const r = await fetch(url, {
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": key,
+        "anthropic-version": "2023-06-01",
+      },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM + ctx }] },
-        contents,
-        generationConfig: { temperature: 0.9, maxOutputTokens: 2048, thinkingConfig: { thinkingBudget: 0 } },
+        model: MODEL,
+        max_tokens: 1500,
+        system: SYSTEM + ctx,
+        messages: clean,
+        stream: true,
       }),
     });
-    if (!r.ok || !r.body) { const t = await r.text().catch(() => ""); res.status(502).end("gemini " + r.status + " " + t.slice(0, 200)); return; }
+    if (!r.ok || !r.body) { const t = await r.text().catch(() => ""); res.status(502).end("anthropic " + r.status + " " + t.slice(0, 200)); return; }
 
     res.setHeader("Content-Type", "text/plain; charset=utf-8");
     res.setHeader("Cache-Control", "no-cache, no-transform");
@@ -81,8 +85,9 @@ module.exports = async function handler(req, res) {
         if (!d || d === "[DONE]") continue;
         try {
           const j = JSON.parse(d);
-          const t = j && j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts && j.candidates[0].content.parts.map(p => p && p.text || "").join("");
-          if (t) res.write(t);
+          if (j.type === "content_block_delta" && j.delta && j.delta.type === "text_delta") {
+            res.write(j.delta.text);
+          }
         } catch (e) { /* ignore keep-alive / non-JSON lines */ }
       }
     }
