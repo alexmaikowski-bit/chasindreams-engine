@@ -62,12 +62,12 @@ React as all four. Return ONLY the JSON.`;
         model: MODEL,
         max_tokens: 1500,
         system: SYSTEM,
-        messages: [{ role: "user", content: user }, { role: "assistant", content: "{" }],
+        messages: [{ role: "user", content: user }],
       }),
     });
     if (!r.ok) { const t = await r.text(); res.status(502).json({ error: "anthropic " + r.status, detail: t.slice(0, 400) }); return; }
     const j = await r.json();
-    const txt = "{" + ((j.content || []).filter(c => c && c.type === "text").map(c => c.text || "").join(""));
+    const txt = ((j.content || []).filter(c => c && c.type === "text").map(c => c.text || "").join("")) || "";
     const m = txt.match(/\{[\s\S]*\}/);
     const parsed = JSON.parse(m ? m[0] : txt);
     res.status(200).json({ reactions: parsed.reactions || [] });
