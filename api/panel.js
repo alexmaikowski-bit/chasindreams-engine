@@ -60,14 +60,14 @@ React as all four. Return ONLY the JSON.`;
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 1024,
+        max_tokens: 1500,
         system: SYSTEM,
-        messages: [{ role: "user", content: user }],
+        messages: [{ role: "user", content: user }, { role: "assistant", content: "{" }],
       }),
     });
     if (!r.ok) { const t = await r.text(); res.status(502).json({ error: "anthropic " + r.status, detail: t.slice(0, 400) }); return; }
     const j = await r.json();
-    const txt = (j.content && j.content[0] && j.content[0].text) || "";
+    const txt = "{" + ((j.content || []).filter(c => c && c.type === "text").map(c => c.text || "").join(""));
     const m = txt.match(/\{[\s\S]*\}/);
     const parsed = JSON.parse(m ? m[0] : txt);
     res.status(200).json({ reactions: parsed.reactions || [] });
